@@ -41,6 +41,10 @@ jsonData.items.forEach(item => {
         item.url = item.url.replace(/([a-zA-Z]+)_[0-9a-zA-Z]*\.(\d{3})\.glb/, (match, name, num) => {
             return `${firstLetterToUpperCase(name)}.${num}.glb`
         });
+        const parts = item.url.split('_');
+        if (parts.length === 2) {
+            item.url = firstLetterToUpperCase(parts[0]) + parts[1]
+        }
     }
 
     if (item.thumbnail) {
