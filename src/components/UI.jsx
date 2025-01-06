@@ -87,9 +87,9 @@ const AssetsBox = () => {
             </div>
           </button>
         )}
-        {currentCategory?.assets.map((asset) => (
+        {currentCategory?.assets.map((asset, index) => (
           <button
-            key={asset.thumbnail}
+            key={asset.thumbnail + index}
             onClick={() => changeAsset(currentCategory.name, asset)}
             className={`w-20 h-20  flex-shrink-0 rounded-xl overflow-hidden pointer-events-auto hover:opacity-100 transition-all border-2 duration-300
               bg-gradient-to-tr

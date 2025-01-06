@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
-import PocketBase from "pocketbase";
 import { MeshStandardMaterial } from "three";
 import { randInt } from "three/src/math/MathUtils.js";
+// import PocketBase from "pocketbase";
 
-const pocketBaseUrl = import.meta.env.VITE_POCKETBASE_URL;
-if (!pocketBaseUrl) {
-  throw new Error("VITE_POCKETBASE_URL is required");
-}
+// const pocketBaseUrl = import.meta.env.VITE_POCKETBASE_URL;
+// if (!pocketBaseUrl) {
+//   throw new Error("VITE_POCKETBASE_URL is required");
+// }
 
 export const PHOTO_POSES = {
   Idle: "Idle",
@@ -24,7 +24,40 @@ export const UI_MODES = {
   CUSTOMIZE: "customize",
 };
 
-export const pb = new PocketBase(pocketBaseUrl);
+// mock
+class PocketBase {
+  url;
+  tempResultPromise;
+
+  files = {
+    getUrl(_, url) {
+      return '/assets/' + url;
+    }
+  }
+
+  constructor(url) {
+    this.url = url
+  }
+
+  collection(name) {
+    switch (name) {
+      case 'CustomizationGroups':
+        this.tempResultPromise = import('./mock/CustomizationGroups.json')
+        return this;
+      case 'CustomizationAssets':
+        this.tempResultPromise = import('./mock/CustomizationAssets.json')
+        return this;
+      default:
+        return this;
+    }
+  }
+
+  async getFullList() {
+    return await this.tempResultPromise.then(response => response.items);
+  }
+}
+
+export const pb = new PocketBase();
 
 export const useConfiguratorStore = create((set, get) => ({
   loading: true,
