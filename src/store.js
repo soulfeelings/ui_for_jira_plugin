@@ -28,6 +28,17 @@ export const UI_MODES = {
 class PocketBase {
   url;
   tempResultPromise;
+  mockData = {
+    character: {
+      name: '',
+    },
+    user: {
+      points: 0,
+      currentLevel: 0,
+      nextLevel: 1,
+      nextLevelPoints: 1000,
+    }
+  };
 
   files = {
     getUrl(_, url) {
@@ -36,7 +47,30 @@ class PocketBase {
   }
 
   constructor(url) {
-    this.url = url
+    this.url = url;
+    if (window.localStorage.getItem('mockData')) {
+      this.mockData = JSON.parse(window.localStorage.getItem('mockData'));
+    }
+
+    /**
+     * Comands examples
+     * window.dispatchEvent(new CustomEvent("mockevent", { detail: { type: "taskIsDone", value: 120  } }))
+     */
+    window.addEventListener('mockevent', async (event) => {
+      const data = event.detail
+      switch (data.type) {
+        case 'taskIsDone':
+          const points = data.value
+          const newPoints = useConfiguratorStore.getState().user.points + points
+          await useConfiguratorStore.getState().updateUser({
+            points: newPoints
+          });
+          this.mockData.user.points = newPoints
+          break;
+        default:
+          break;
+      }
+    })
   }
 
   collection(name) {
@@ -55,15 +89,89 @@ class PocketBase {
   async getFullList() {
     return await this.tempResultPromise.then(response => response.items);
   }
+
+  async getCharacter() {
+    return await new Promise(res => {
+      setTimeout(() => {
+        res(this.mockData.character)
+      }, 1000)
+    });
+  }
+
+  async saveCharacter(character) {
+    return await new Promise(res => {
+      setTimeout(() => {
+        this.mockData.character = { ...this.mockData.character, ...character };
+        res(this.mockData.character);
+      }, 1000)
+    });
+  }
+
+  async getUser() {
+    return await new Promise(res => {
+      setTimeout(() => {
+        res(this.mockData.user)
+      }, 1000)
+    });
+  }
+
+  async saveUser(user) {
+    return await new Promise(res => {
+      setTimeout(() => {
+        this.mockData.user = { ...this.mockData.user, ...user };
+        res(this.mockData.user)
+      }, 1000)
+    });
+  }
 }
 
 export const pb = new PocketBase();
 
 export const useConfiguratorStore = create((set, get) => ({
-  experience: null,
-  currentLevel: null,
-  nextLevel: null,
-
+  initialDataLoaded: false,
+  fetchInitial: async () => {
+    set({
+      initialDataLoaded: false
+    })
+    try {
+      await Promise.all([
+        get().fetchUser(),
+        get().fetchCharacter(),
+        get().fetchCategories()
+      ]);
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({
+        initialDataLoaded: true
+      })
+    }
+  },
+  character: {
+    name: null,
+  },
+  loadingCharacter: false,
+  updateCharacter: async (character) => {
+    const newCharacter = await pb.saveCharacter(character);
+    set({ character: newCharacter })
+  },
+  user: {
+    points: null,
+    currentLevel: null,
+    nextLevel: null,
+    nextLevelPoints: null,
+  },
+  updateUser: async (user) => {
+    debugger
+    const newUser = await pb.saveUser(user);
+    set({
+      user: {
+        ...get().user,
+        ...newUser
+      }
+    })
+  },
+  loadingUser: false,
 
   loading: true,
   mode: UI_MODES.CUSTOMIZE,
@@ -198,6 +306,27 @@ export const useConfiguratorStore = create((set, get) => ({
 
     set({ lockedGroups });
   },
+  fetchUser: async () => {
+    set({
+      loadingUser: true
+    })
+    const user = await pb.getUser();
+    set({
+      user: user,
+      loadingUser: false
+    })
+  },
+  fetchCharacter: async () => {
+    set({
+      loadingCharacter: true
+    })
+    const character = await pb.getCharacter();
+    set({
+      character: character,
+      loadingCharacter: false
+    })
+  }
 }));
 
-useConfiguratorStore.getState().fetchCategories();
+console.log(useConfiguratorStore.getState())
+useConfiguratorStore.getState().fetchInitial()

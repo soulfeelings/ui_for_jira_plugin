@@ -91,7 +91,7 @@ const AssetsBox = () => {
           <button
             key={asset.thumbnail + index}
             onClick={() => changeAsset(currentCategory.name, asset)}
-            className={`w-20 h-20  flex-shrink-0 rounded-xl overflow-hidden pointer-events-auto hover:opacity-100 transition-all border-2 duration-300
+            className={`w-20 h-20 relative flex-shrink-0 rounded-xl overflow-hidden pointer-events-auto hover:opacity-100 transition-all border-2 duration-300
               bg-gradient-to-tr
               ${
                 customization[currentCategory.name]?.asset?.id === asset.id
@@ -103,6 +103,17 @@ const AssetsBox = () => {
               className="object-cover w-full h-full"
               src={pb.files.getUrl(asset, asset.thumbnail)}
             />
+            {/*{asset.payable &&*/}
+                <div style={{ padding: '5px', background: 'black', position: 'absolute',
+                  zIndex: 10,
+                  top: 0,
+                  left: 0,
+                  fontSize: '10px'
+                }}>
+                  PAY 200 POINTS
+                </div>
+            {/*}*/}
+
           </button>
         ))}
       </div>
@@ -185,6 +196,7 @@ export const UI = () => {
   const mode = useConfiguratorStore((state) => state.mode);
   const setMode = useConfiguratorStore((state) => state.setMode);
   const loading = useConfiguratorStore((state) => state.loading);
+  const user = useConfiguratorStore((state) => state.user);
   return (
     <main className="pointer-events-none fixed z-10 inset-0 select-none">
       <div
@@ -210,6 +222,19 @@ export const UI = () => {
             <ScreenshotButton />
             <DownloadButton />
           </div>
+        </div>
+        <div>
+          <bold>
+          Character points: {user.points}
+          </bold>
+          <br/>
+          <bold>
+            Current level: {user.currentLevel}
+          </bold>
+          <br/>
+          <bold>
+            Next level: {user.nextLevel}, Next level points: {user.nextLevelPoints}
+          </bold>
         </div>
         <div className="md:px-10 flex flex-col">
           {mode === UI_MODES.CUSTOMIZE && (
