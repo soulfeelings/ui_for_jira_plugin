@@ -60,6 +60,11 @@ class PocketBase {
 export const pb = new PocketBase();
 
 export const useConfiguratorStore = create((set, get) => ({
+  experience: null,
+  currentLevel: null,
+  nextLevel: null,
+
+
   loading: true,
   mode: UI_MODES.CUSTOMIZE,
   setMode: (mode) => {
