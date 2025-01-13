@@ -90,7 +90,7 @@ export const Experience = () => {
   return (
     <>
       <CameraManager loading={loading} />
-      <Environment preset="sunset" environmentIntensity={0.3} />
+      {/*<Environment preset="sunset" environmentIntensity={0.3} />*/}
 
       <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-0.31}>
         <planeGeometry args={[100, 100]} />

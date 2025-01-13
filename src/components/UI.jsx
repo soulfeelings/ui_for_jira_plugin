@@ -215,7 +215,7 @@ export const UI = () => {
             className="pointer-events-auto"
             href="https://lessons.wawasensei.dev/courses/react-three-fiber"
           >
-            <img className="w-20" src="/images/wawasensei-white.png" />
+            {/*<img className="w-20" src="/images/wawasensei-white.png" />*/}
           </a>
           <div className="flex items-cente gap-2">
             <RandomizeButton />
@@ -224,17 +224,15 @@ export const UI = () => {
           </div>
         </div>
         <div>
-          <bold>
+          <p>
           Character points: {user.points}
-          </bold>
-          <br/>
-          <bold>
+          </p>
+          <p>
             Current level: {user.currentLevel}
-          </bold>
-          <br/>
-          <bold>
+          </p>
+          <p>
             Next level: {user.nextLevel}, Next level points: {user.nextLevelPoints}
-          </bold>
+          </p>
         </div>
         <div className="md:px-10 flex flex-col">
           {mode === UI_MODES.CUSTOMIZE && (
