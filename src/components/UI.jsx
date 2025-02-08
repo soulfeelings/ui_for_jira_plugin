@@ -104,14 +104,14 @@ const AssetsBox = () => {
               src={pb.files.getUrl(asset, asset.thumbnail)}
             />
             {/*{asset.payable &&*/}
-                <div style={{ padding: '5px', background: 'black', position: 'absolute',
-                  zIndex: 10,
-                  top: 0,
-                  left: 0,
-                  fontSize: '10px'
-                }}>
-                  PAY 200 POINTS
-                </div>
+            {/*    <div style={{ padding: '5px', background: 'black', position: 'absolute',*/}
+            {/*      zIndex: 10,*/}
+            {/*      top: 0,*/}
+            {/*      left: 0,*/}
+            {/*      fontSize: '10px'*/}
+            {/*    }}>*/}
+            {/*      PAY 200 POINTS*/}
+            {/*    </div>*/}
             {/*}*/}
 
           </button>

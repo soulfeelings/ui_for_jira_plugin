@@ -2,12 +2,12 @@ import { create } from "zustand";
 
 import { MeshStandardMaterial } from "three";
 import { randInt } from "three/src/math/MathUtils.js";
-// import PocketBase from "pocketbase";
+import PocketBase from "pocketbase";
 
-// const pocketBaseUrl = import.meta.env.VITE_POCKETBASE_URL;
-// if (!pocketBaseUrl) {
-//   throw new Error("VITE_POCKETBASE_URL is required");
-// }
+const pocketBaseUrl = import.meta.env.VITE_POCKETBASE_URL;
+if (!pocketBaseUrl) {
+  throw new Error("VITE_POCKETBASE_URL is required");
+}
 
 export const PHOTO_POSES = {
   Idle: "Idle",
@@ -24,108 +24,7 @@ export const UI_MODES = {
   CUSTOMIZE: "customize",
 };
 
-// mock
-class PocketBase {
-  url;
-  tempResultPromise;
-  mockData = {
-    character: {
-      name: '',
-    },
-    user: {
-      points: 0,
-      currentLevel: 0,
-      nextLevel: 1,
-      nextLevelPoints: 1000,
-    }
-  };
-
-  files = {
-    getUrl(_, url) {
-      return '/assets/' + url;
-    }
-  }
-
-  constructor(url) {
-    this.url = url;
-    if (window.localStorage.getItem('mockData')) {
-      this.mockData = JSON.parse(window.localStorage.getItem('mockData'));
-    }
-
-    /**
-     * Comands examples
-     * window.dispatchEvent(new CustomEvent("mockevent", { detail: { type: "taskIsDone", value: 120  } }))
-     */
-    window.addEventListener('mockevent', async (event) => {
-      const data = event.detail
-      switch (data.type) {
-        case 'taskIsDone':
-          const points = data.value
-          const newPoints = useConfiguratorStore.getState().user.points + points
-          await useConfiguratorStore.getState().updateUser({
-            points: newPoints
-          });
-          this.mockData.user.points = newPoints
-          break;
-        default:
-          break;
-      }
-    })
-  }
-
-  collection(name) {
-    switch (name) {
-      case 'CustomizationGroups':
-        this.tempResultPromise = import('./mock/CustomizationGroups.json')
-        return this;
-      case 'CustomizationAssets':
-        this.tempResultPromise = import('./mock/CustomizationAssets.json')
-        return this;
-      default:
-        return this;
-    }
-  }
-
-  async getFullList() {
-    return await this.tempResultPromise.then(response => response.items);
-  }
-
-  async getCharacter() {
-    return await new Promise(res => {
-      setTimeout(() => {
-        res(this.mockData.character)
-      }, 1000)
-    });
-  }
-
-  async saveCharacter(character) {
-    return await new Promise(res => {
-      setTimeout(() => {
-        this.mockData.character = { ...this.mockData.character, ...character };
-        res(this.mockData.character);
-      }, 1000)
-    });
-  }
-
-  async getUser() {
-    return await new Promise(res => {
-      setTimeout(() => {
-        res(this.mockData.user)
-      }, 1000)
-    });
-  }
-
-  async saveUser(user) {
-    return await new Promise(res => {
-      setTimeout(() => {
-        this.mockData.user = { ...this.mockData.user, ...user };
-        res(this.mockData.user)
-      }, 1000)
-    });
-  }
-}
-
-export const pb = new PocketBase();
+export const pb = new PocketBase(pocketBaseUrl);
 
 export const useConfiguratorStore = create((set, get) => ({
   initialDataLoaded: false,
@@ -134,11 +33,7 @@ export const useConfiguratorStore = create((set, get) => ({
       initialDataLoaded: false
     })
     try {
-      await Promise.all([
-        get().fetchUser(),
-        get().fetchCharacter(),
-        get().fetchCategories()
-      ]);
+      get().fetchInitialData()
     } catch (error) {
       console.error(error)
     } finally {
@@ -189,9 +84,9 @@ export const useConfiguratorStore = create((set, get) => ({
   lockedGroups: {},
   skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
   customization: {},
-  download: () => {},
+  download: () => { },
   setDownload: (download) => set({ download }),
-  screenshot: () => {},
+  screenshot: () => { },
   setScreenshot: (screenshot) => set({ screenshot }),
   updateColor: (color) => {
     set((state) => ({
@@ -210,27 +105,28 @@ export const useConfiguratorStore = create((set, get) => ({
   updateSkin: (color) => {
     get().skin.color.set(color);
   },
-  fetchCategories: async () => {
+  fetchInitialData: async () => {
     // you can also fetch all records at once via getFullList
-    const categories = await pb.collection("CustomizationGroups").getFullList({
-      sort: "+position",
-      expand: "colorPalette,cameraPlacement",
-    });
-    const assets = await pb.collection("CustomizationAssets").getFullList({
-      sort: "-created",
-    });
-    const customization = {};
-    categories.forEach((category) => {
-      category.assets = assets.filter((asset) => asset.group === category.id);
-      customization[category.name] = {
-        color: category.expand?.colorPalette?.colors?.[0] || "",
-      };
-      if (category.startingAsset) {
-        customization[category.name].asset = category.assets.find(
-          (asset) => asset.id === category.startingAsset
-        );
-      }
-    });
+    const user = await pb.collection("users").authWithPassword('test@test.com', 'testtest');
+    const categories = await pb.collection("category").getFullList();
+    const assets = await pb.collection("assets").getFullList();
+    console.log('user', user);
+    console.log('categories', categories);
+    console.log('assets', assets);
+
+    // const customization = await pb.collection("character_customization").getOne();
+    // const customization = {};
+    // categories.forEach((category) => {
+    //   category.assets = assets.filter((asset) => asset.group === category.id);
+    //   customization[category.name] = {
+    //     color: category.expand?.colorPalette?.colors?.[0] || "",
+    //   };
+    //   if (category.startingAsset) {
+    //     customization[category.name].asset = category.assets.find(
+    //       (asset) => asset.id === category.startingAsset
+    //     );
+    //   }
+    // });
 
     set({
       categories,
@@ -265,7 +161,7 @@ export const useConfiguratorStore = create((set, get) => ({
       }
       const randomColor =
         category.expand?.colorPalette?.colors?.[
-          randInt(0, category.expand.colorPalette.colors.length - 1)
+        randInt(0, category.expand.colorPalette.colors.length - 1)
         ];
       customization[category.name] = {
         asset: randomAsset,
@@ -306,27 +202,7 @@ export const useConfiguratorStore = create((set, get) => ({
 
     set({ lockedGroups });
   },
-  fetchUser: async () => {
-    set({
-      loadingUser: true
-    })
-    const user = await pb.getUser();
-    set({
-      user: user,
-      loadingUser: false
-    })
-  },
-  fetchCharacter: async () => {
-    set({
-      loadingCharacter: true
-    })
-    const character = await pb.getCharacter();
-    set({
-      character: character,
-      loadingCharacter: false
-    })
-  }
 }));
 
 console.log(useConfiguratorStore.getState())
-useConfiguratorStore.getState().fetchInitial()
+// useConfiguratorStore.getState().fetchInitial()
