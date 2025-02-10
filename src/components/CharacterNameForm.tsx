@@ -1,8 +1,14 @@
+import { GreenCheck } from "@/svgs/GreenCheck";
 import { useState } from "react";
+import { Button } from "./Button";
+import { motion, AnimatePresence } from 'framer-motion';
+import { useConfiguratorStore } from "@/store";
 
 export const CharacterNameForm = () => {
     const [name, setName] = useState("");
     const [error, setError] = useState("");
+
+    const { loadingName, saveName } = useConfiguratorStore();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -14,22 +20,48 @@ export const CharacterNameForm = () => {
         }
     };
 
+
     return (
         <div className="flex flex-col md:flex-row gap-12 items-center justify-center h-screen">
             <SVGIllustration />
-            <div className="flex flex-col items-center p-6 space-y-4 rounded-lg w-[300px] md:w-[500px]">
+            <div className="flex flex-col items-center p-6 space-y-4 rounded-lg shadow-[0_6px_5.2px_0px_rgba(0,0,0,0.03)] w-[500px]">
                 <h2 className="text-[20px] md:text-[30px] font-bold text-gray-900 text-center">What do you want to name your character?</h2>
-                <input
-                    type="text"
-                    placeholder="Enter your character name with > 2 characters"
-                    value={name}
-                    onChange={handleChange}
-                    className="w-[90%] px-[20px] py-[20px] text-[#6C6C6C] bg-[#F0F0F0] font-bold text-[16px] md:text-[28px] border border-gray-300 rounded-[30px] shadow-[0_6px_5.2px_0px_rgba(0,0,0,0.03)] focus:outline-none focus:ring-2 focus:ring-grey-500"
-                />
-                {error && <p className="text-[12px] md:text-[22px] text-color-[#C7C7C7] ">{error}</p>}
+                <div className="relative flex items-stretch gap-2">
+                    <input
+                        type="text"
+                        placeholder="Enter your character name with > 2 characters"
+                        value={name}
+                        onChange={handleChange}
+                        className="w-[90%] px-[20px] py-[20px] text-[#6C6C6C] bg-[#F0F0F0] font-bold text-[16px] md:text-[28px] border border-gray-300 rounded-[30px] shadow-[0_6px_5.2px_0px_rgba(0,0,0,0.03)] focus:outline-none focus:ring-2 focus:ring-grey-500"
+                    />
+                    {!error && <div className="absolute right-[-20px] top-[50%] translate-y-[-50%]"><GreenCheck /></div>}
+                </div>
+                <AnimatePresence mode="wait">
+                    {error ? (
+                        <motion.p
+                            key="error"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-[12px] md:text-[22px] text-color-[#C7C7C7]"
+                        >
+                            {error}
+                        </motion.p>
+                    ) : (
+                        <motion.div
+                            key="button"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <Button text="Continue" onClick={() => saveName(name)} loading={loadingName} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
-
     );
 }
 
@@ -134,6 +166,5 @@ function SVGIllustration() {
                 </filter>
             </defs>
         </svg>
-
     )
 }
