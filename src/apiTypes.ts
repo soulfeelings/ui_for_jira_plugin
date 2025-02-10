@@ -14,11 +14,17 @@ export type User = {
     updatedAt: string;
 }
 
-export type UserCharacter = {
+export type UserCharacterExpandedCharacter = {
     id: string;
     user_id: string;
     character_id: string;
     name: string;
     createdAt: string;
     updatedAt: string;
+    expand: {
+        character_id: Character;
+    }
 }
+
+
+

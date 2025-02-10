@@ -1,7 +1,8 @@
 import { CameraControls } from "@react-three/drei";
 import { button, useControls } from "leva";
 import { useEffect, useRef } from "react";
-import { UI_MODES, useConfiguratorStore } from "../store";
+import { useConfiguratorStore } from "../store.ts";
+import { UI_MODES } from "../store_types.ts";
 
 export const START_CAMERA_POSITION = [500, 10, 1000];
 export const DEFAULT_CAMERA_POSITION = [-1, 1, 5];

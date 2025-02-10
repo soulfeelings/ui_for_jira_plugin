@@ -4,18 +4,20 @@ import { Leva } from "leva";
 import { DEFAULT_CAMERA_POSITION } from "./components/CameraManager.jsx";
 import { Experience } from "./components/Experience.jsx";
 import { UI } from "./components/UI.jsx";
-import { useConfiguratorStore } from "./store.js";
+import { useConfiguratorStore } from "./store";
 import { CharacterNameForm } from "./components/CharacterNameForm.jsx";
 import { ScreenLoader } from "./components/ScreenLoader.jsx";
+
 
 function App() {
   const initialDataLoaded = useConfiguratorStore(state => state.initialDataLoaded);
   const character = useConfiguratorStore(state => state.character);
-  // if (!initialDataLoaded) {
-  //   return <ScreenLoader />
-  // }
+  if (!initialDataLoaded) {
+    return <ScreenLoader />
+  }
 
-  if (!character.name) {
+  console.log(character)
+  if (!character?.name) {
     return <CharacterNameForm />
   }
 
@@ -45,5 +47,6 @@ function App() {
     </>
   );
 }
+
 
 export default App;

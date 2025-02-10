@@ -1,4 +1,6 @@
-import { pb, PHOTO_POSES, UI_MODES, useConfiguratorStore } from "../store";
+import { useConfiguratorStore } from "../store.ts";
+import { PHOTO_POSES, UI_MODES } from "../store_types.ts";
+import { LevelComponent } from "./LevelComponent.tsx";
 
 const PosesBox = () => {
   const curPose = useConfiguratorStore((state) => state.pose);
@@ -7,11 +9,10 @@ const PosesBox = () => {
     <div className="pointer-events-auto md:rounded-t-lg bg-gradient-to-br from-black/30 to-indigo-900/20  backdrop-blur-sm drop-shadow-md flex p-6 gap-3 overflow-x-auto noscrollbar">
       {Object.keys(PHOTO_POSES).map((pose) => (
         <button
-          className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${
-            curPose === PHOTO_POSES[pose]
-              ? "text-white shadow-purple-100 border-b-white"
-              : "text-gray-200 hover:text-gray-100 border-b-transparent"
-          }
+          className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${curPose === PHOTO_POSES[pose]
+            ? "text-white shadow-purple-100 border-b-white"
+            : "text-gray-200 hover:text-gray-100 border-b-transparent"
+            }
        `}
           onClick={() => setPose(PHOTO_POSES[pose])}
         >
@@ -39,11 +40,10 @@ const AssetsBox = () => {
           <button
             key={category.id}
             onClick={() => setCurrentCategory(category)}
-            className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${
-              currentCategory?.name === category.name
-                ? "text-white shadow-purple-100 border-b-white"
-                : "text-gray-200 hover:text-gray-100 border-b-transparent"
-            }`}
+            className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${currentCategory?.name === category.name
+              ? "text-white shadow-purple-100 border-b-white"
+              : "text-gray-200 hover:text-gray-100 border-b-transparent"
+              }`}
           >
             {category.name}
           </button>
@@ -63,10 +63,9 @@ const AssetsBox = () => {
             onClick={() => changeAsset(currentCategory.name, null)}
             className={`w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden pointer-events-auto hover:opacity-100 transition-all border-2 duration-300
               bg-gradient-to-tr
-              ${
-                !customization[currentCategory.name].asset
-                  ? "border-white from-white/20 to-white/30"
-                  : "from-black/70 to-black/20 border-black"
+              ${!customization[currentCategory.name].asset
+                ? "border-white from-white/20 to-white/30"
+                : "from-black/70 to-black/20 border-black"
               }`}
           >
             <div className="w-full h-full flex items-center justify-center bg-black/40 text-white">
@@ -93,10 +92,9 @@ const AssetsBox = () => {
             onClick={() => changeAsset(currentCategory.name, asset)}
             className={`w-20 h-20 relative flex-shrink-0 rounded-xl overflow-hidden pointer-events-auto hover:opacity-100 transition-all border-2 duration-300
               bg-gradient-to-tr
-              ${
-                customization[currentCategory.name]?.asset?.id === asset.id
-                  ? "border-white from-white/20 to-white/30"
-                  : "from-black/70 to-black/20 border-black"
+              ${customization[currentCategory.name]?.asset?.id === asset.id
+                ? "border-white from-white/20 to-white/30"
+                : "from-black/70 to-black/20 border-black"
               }`}
           >
             <img
@@ -189,20 +187,20 @@ const DownloadButton = () => {
 };
 
 export const UI = () => {
-  const currentCategory = useConfiguratorStore(
-    (state) => state.currentCategory
-  );
-  const customization = useConfiguratorStore((state) => state.customization);
-  const mode = useConfiguratorStore((state) => state.mode);
-  const setMode = useConfiguratorStore((state) => state.setMode);
+  // const currentCategory = useConfiguratorStore(
+  //   (state) => state.currentCategory
+  // );
+  // const customization = useConfiguratorStore((state) => state.customization);
+  // const mode = useConfiguratorStore((state) => state.mode);
+  // const setMode = useConfiguratorStore((state) => state.setMode);
   const loading = useConfiguratorStore((state) => state.loading);
-  const user = useConfiguratorStore((state) => state.user);
+  // const user = useConfiguratorStore((state) => state.user);
+
   return (
     <main className="pointer-events-none fixed z-10 inset-0 select-none">
       <div
-        className={`absolute inset-0 bg-black z-10 pointer-events-none flex items-center justify-center transition-opacity  duration-1000 ${
-          loading ? "opacity-100" : "opacity-0"
-        }`}
+        className={`absolute inset-0 bg-black z-10 pointer-events-none flex items-center justify-center transition-opacity  duration-1000 ${loading ? "opacity-100" : "opacity-0"
+          }`}
       >
         <img
           src="/images/wawasensei-white.png"
@@ -210,46 +208,38 @@ export const UI = () => {
         />
       </div>
       <div className="mx-auto h-full max-w-screen-xl w-full flex flex-col justify-between">
-        <div className="flex justify-between items-center p-10">
+        {/* <div className="flex justify-between items-center p-10">
           <a
             className="pointer-events-auto"
             href="https://lessons.wawasensei.dev/courses/react-three-fiber"
           >
-            {/*<img className="w-20" src="/images/wawasensei-white.png" />*/}
+            <img className="w-20" src="/images/wawasensei-white.png" />
           </a>
           <div className="flex items-cente gap-2">
             <RandomizeButton />
             <ScreenshotButton />
             <DownloadButton />
           </div>
-        </div>
-        <div>
-          <p>
-          Character points: {user.points}
-          </p>
-          <p>
-            Current level: {user.currentLevel}
-          </p>
-          <p>
-            Next level: {user.nextLevel}, Next level points: {user.nextLevelPoints}
-          </p>
+        </div> */}
+
+        <div className="fixed right-16 top-1/2 -translate-y-1/2">
+          <LevelComponent />
         </div>
         <div className="md:px-10 flex flex-col">
-          {mode === UI_MODES.CUSTOMIZE && (
+          {/* {mode === UI_MODES.CUSTOMIZE && (
             <>
               {currentCategory?.colorPalette &&
                 customization[currentCategory.name] && <ColorPicker />}
               <AssetsBox />
             </>
-          )}
-          {mode === UI_MODES.PHOTO && <PosesBox />}
-          <div className="flex justify-stretch">
+          )} */}
+          {/* {mode === UI_MODES.PHOTO && <PosesBox />} */}
+          {/* <div className="flex justify-stretch">
             <button
               className={`flex-1 pointer-events-auto  p-4 text-white transition-colors duration-200 font-medium
-                ${
-                  mode === UI_MODES.CUSTOMIZE
-                    ? "bg-indigo-500/90"
-                    : "bg-indigo-500/30 hover:bg-indigo-500/50"
+                ${mode === UI_MODES.CUSTOMIZE
+                  ? "bg-indigo-500/90"
+                  : "bg-indigo-500/30 hover:bg-indigo-500/50"
                 }
               `}
               onClick={() => setMode(UI_MODES.CUSTOMIZE)}
@@ -259,20 +249,19 @@ export const UI = () => {
             <div className="w-px bg-white/30"></div>
             <button
               className={`flex-1 pointer-events-auto p-4 text-white transition-colors duration-200 font-medium
-                ${
-                  mode === UI_MODES.PHOTO
-                    ? "bg-indigo-500/90"
-                    : "bg-indigo-500/30 hover:bg-indigo-500/50"
+                ${mode === UI_MODES.PHOTO
+                  ? "bg-indigo-500/90"
+                  : "bg-indigo-500/30 hover:bg-indigo-500/50"
                 }
                 `}
               onClick={() => setMode(UI_MODES.PHOTO)}
             >
               Photo booth
             </button>
-          </div>
+          </div> */}
         </div>
-      </div>
-    </main>
+      </div >
+    </main >
   );
 };
 
@@ -295,11 +284,10 @@ const ColorPicker = () => {
         <button
           key={`${index}-${color}`}
           className={`w-10 h-10 p-1.5 drop-shadow-md bg-black/20 shrink-0 rounded-lg overflow-hidden transition-all duration-300 border-2
-             ${
-               customization[currentCategory.name].color === color
-                 ? "border-white"
-                 : "border-transparent"
-             }
+             ${customization[currentCategory.name].color === color
+              ? "border-white"
+              : "border-transparent"
+            }
           `}
           onClick={() => handleColorChange(color)}
         >

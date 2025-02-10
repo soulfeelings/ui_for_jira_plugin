@@ -4,17 +4,19 @@ import { Button } from "./Button";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfiguratorStore } from "@/store";
 
+const NAME_ERROR = "The name must be more than 2 characters.";
+
 export const CharacterNameForm = () => {
     const [name, setName] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState(NAME_ERROR);
 
-    const { loadingName, saveName } = useConfiguratorStore();
+    const { loadingName, createCharacterLoading, createCharacter } = useConfiguratorStore();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setName(value);
         if (value.length <= 2) {
-            setError("The name must be more than 2 characters.");
+            setError(NAME_ERROR);
         } else {
             setError("");
         }
@@ -56,7 +58,7 @@ export const CharacterNameForm = () => {
                             exit={{ opacity: 0, y: 10 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <Button text="Continue" onClick={() => saveName(name)} loading={loadingName} />
+                            <Button text="Continue" onClick={() => createCharacter(name)} loading={loadingName || createCharacterLoading} />
                         </motion.div>
                     )}
                 </AnimatePresence>
