@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useConfiguratorStore } from "../store.ts";
 import { PHOTO_POSES, UI_MODES } from "../store_types.ts";
 import { LevelComponent } from "./LevelComponent.tsx";
@@ -26,6 +27,7 @@ const PosesBox = () => {
 const AssetsBox = () => {
   const {
     categories,
+    loadingCategories,
     currentCategory,
     setCurrentCategory,
     changeAsset,
@@ -36,29 +38,35 @@ const AssetsBox = () => {
   return (
     <div className="md:rounded-t-lg bg-gradient-to-br from-black/30 to-indigo-900/20  backdrop-blur-sm drop-shadow-md flex flex-col py-6 gap-3 overflow-hidden ">
       <div className="flex items-center gap-8 pointer-events-auto noscrollbar overflow-x-auto px-6 pb-2">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            onClick={() => setCurrentCategory(category)}
-            className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${currentCategory?.name === category.name
-              ? "text-white shadow-purple-100 border-b-white"
-              : "text-gray-200 hover:text-gray-100 border-b-transparent"
-              }`}
-          >
-            {category.name}
-          </button>
-        ))}
+        {loadingCategories ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="w-10 h-10 border-t-transparent border-b-transparent border-r-transparent border-l-transparent border-4 animate-spin rounded-full" />
+          </div>
+        ) : (
+          categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setCurrentCategory(category)}
+              className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${currentCategory?.name === category.name
+                ? "text-white shadow-purple-100 border-b-white"
+                : "text-gray-200 hover:text-gray-100 border-b-transparent"
+                }`}
+            >
+              {category.name}
+            </button>
+          ))
+        )}
       </div>
-      {lockedGroups[currentCategory?.name] && (
+      {/* {lockedGroups[currentCategory?.name] && (
         <p className="text-red-400 px-6">
           Asset is hidden by{" "}
           {lockedGroups[currentCategory.name]
             .map((asset) => `${asset.name} (${asset.categoryName})`)
             .join(", ")}
         </p>
-      )}
+      )} */}
       <div className="flex gap-2 overflow-x-auto noscrollbar px-6">
-        {currentCategory?.removable && (
+        {/* {currentCategory?.removable && (
           <button
             onClick={() => changeAsset(currentCategory.name, null)}
             className={`w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden pointer-events-auto hover:opacity-100 transition-all border-2 duration-300
@@ -85,8 +93,8 @@ const AssetsBox = () => {
               </svg>
             </div>
           </button>
-        )}
-        {currentCategory?.assets.map((asset, index) => (
+        )} */}
+        {/* {currentCategory?.assets.map((asset, index) => (
           <button
             key={asset.thumbnail + index}
             onClick={() => changeAsset(currentCategory.name, asset)}
@@ -101,19 +109,8 @@ const AssetsBox = () => {
               className="object-cover w-full h-full"
               src={pb.files.getUrl(asset, asset.thumbnail)}
             />
-            {/*{asset.payable &&*/}
-            {/*    <div style={{ padding: '5px', background: 'black', position: 'absolute',*/}
-            {/*      zIndex: 10,*/}
-            {/*      top: 0,*/}
-            {/*      left: 0,*/}
-            {/*      fontSize: '10px'*/}
-            {/*    }}>*/}
-            {/*      PAY 200 POINTS*/}
-            {/*    </div>*/}
-            {/*}*/}
-
           </button>
-        ))}
+        ))} */}
       </div>
     </div>
   );
@@ -191,10 +188,14 @@ export const UI = () => {
   //   (state) => state.currentCategory
   // );
   // const customization = useConfiguratorStore((state) => state.customization);
-  // const mode = useConfiguratorStore((state) => state.mode);
+  const mode = useConfiguratorStore((state) => state.mode);
   // const setMode = useConfiguratorStore((state) => state.setMode);
   const loading = useConfiguratorStore((state) => state.loading);
   // const user = useConfiguratorStore((state) => state.user);
+
+  useEffect(() => {
+    console.log("loading", loading);
+  }, [loading]);
 
   return (
     <main className="pointer-events-none fixed z-10 inset-0 select-none">
@@ -226,14 +227,14 @@ export const UI = () => {
           <LevelComponent />
         </div>
         <div className="md:px-10 flex flex-col">
-          {/* {mode === UI_MODES.CUSTOMIZE && (
+          {mode === UI_MODES.CUSTOMIZE && (
             <>
               {currentCategory?.colorPalette &&
                 customization[currentCategory.name] && <ColorPicker />}
               <AssetsBox />
             </>
-          )} */}
-          {/* {mode === UI_MODES.PHOTO && <PosesBox />} */}
+          )}
+          {mode === UI_MODES.PHOTO && <PosesBox />}
           {/* <div className="flex justify-stretch">
             <button
               className={`flex-1 pointer-events-auto  p-4 text-white transition-colors duration-200 font-medium

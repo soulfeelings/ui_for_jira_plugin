@@ -2,8 +2,8 @@ import { create } from "zustand";
 
 import { MeshStandardMaterial } from "three";
 import PocketBase from "pocketbase";
-import { User, Character, UserCharacterExpandedCharacter } from "./apiTypes";
-import { ConfiguratorStore, PHOTO_POSES, UI_MODES, Category, Asset } from "./store_types";
+import { User, Character, UserCharacterExpandedCharacter, Level, UserLevel, UserXp } from "./apiTypes";
+import { ConfiguratorStore, PHOTO_POSES, UI_MODES, Asset, CategoryExpandedDefaultAsset, Customization } from "./store_types";
 
 
 const pocketBaseUrl = import.meta.env?.VITE_POCKETBASE_URL;
@@ -15,19 +15,64 @@ export const pb = new PocketBase(pocketBaseUrl);
 
 
 export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
+  // initial data
   initialDataLoaded: false,
+  character: null,
+  user: null,
+  user_level: null,
+  user_xp: null,
+  levels: [],
+  categories: [],
+
+  // loading states
+  loading: false,
+  loadingCharacter: false,
+  loadingUser: false,
+  loadingCategories: false,
+  loadingLevels: false,
+  loadingUserLevel: false,
+  loadingUserXp: false,
+
+  // setters
+  setCurrentCategory: (category: CategoryExpandedDefaultAsset) => set({ currentCategory: category }),
+  setCustomization: (customization: Customization) => set({ customization }),
+  setUserLevel: (level: UserLevel) => set({ user_level: level }),
+  setUserXp: (xp: UserXp) => set({ user_xp: xp }),
+  setLevels: (levels: Level[]) => set({ levels }),
+
+  // controller methods
+  fetchLevels: async () => {
+    set({ loadingLevels: true });
+    try {
+      const levels = await pb.collection('user_levels').getFullList<Level>({
+        sort: 'level'
+      });
+      set({ levels });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingLevels: false });
+    }
+  },
   fetchInitialData: async () => {
     set({
       initialDataLoaded: false
     })
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // await new Promise(resolve => setTimeout(resolve, 2000));
       const user = await get().fetchUser()
+      console.log('user', user);
       if (user) {
         await get().fetchUserCharacter(user.id)
         const character = get().character
         if (character) {
           console.log('character', character);
+          await Promise.all([
+            get().fetchCategories(),
+            get().fetchLevels(),
+            get().fetchUserLevel(),
+            get().fetchUserXp()
+          ]);
         }
       }
     } catch (error) {
@@ -38,25 +83,64 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       })
     }
   },
-  character: {
-    id: '',
-    name: '',
-    createdAt: '',
+  fetchUserLevel: async () => {
+    set({ loadingUserLevel: true });
+    try {
+      const userLevel = await pb.collection('user_level').getFirstListItem<UserLevel>(`user_id="${get().user?.id}"`);
+      set({ user_level: userLevel });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingUserLevel: false });
+    }
   },
-  loadingCharacter: false,
+  fetchUserXp: async () => {
+    set({ loadingUserXp: true });
+    try {
+      const userXp = await pb.collection('user_xp').getFirstListItem<UserXp>(`user_id="${get().user?.id}"`);
+      set({ user_xp: userXp });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingUserXp: false });
+    }
+  },
+
+  fetchCategories: async () => {
+    set({ loadingCategories: true });
+    try {
+      const records = await pb.collection('category').getFullList<CategoryExpandedDefaultAsset>({
+        sort: '-created',
+        expand: 'default_asset_id'
+      });
+
+      set({ categories: records });
+      get().setCustomization(records.reduce((acc, category) => ({
+        ...acc,
+        [category.name]: {
+          asset: category.expand.default_asset_id,
+          color: '#000000'
+        }
+      }), {}))
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingCategories: false });
+    }
+  },
+  fetchUserCharacter: async (user_id: string) => {
+    const userCharacter = await pb.collection("user_character").getFirstListItem<UserCharacterExpandedCharacter>(`user_id="${user_id}"`, {
+      expand: 'character_id'
+    });
+
+    set({ character: userCharacter.expand.character_id });
+  },
+
   updateCharacter: async (character: Character) => {
     const newCharacter = await pb.collection('characters').update<Character>(character.id, character);
     set({ character: newCharacter })
   },
-  user: {
-    id: '',
-    email: '',
-    name: '',
-    avatar: '',
-    jira_id: '',
-    createdAt: '',
-    updatedAt: '',
-  },
+
   updateUser: async () => {
     // const newUser = await pb.collection('users').update(user.id, user);
     // set({
@@ -66,10 +150,8 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     //   }
     // })
   },
-  loadingUser: false,
-  loading: false, //true,
 
-  mode: UI_MODES.CUSTOMIZE,
+  mode: UI_MODES.LEVEL,
   setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => {
     set({ mode });
     if (mode === UI_MODES.CUSTOMIZE) {
@@ -78,7 +160,6 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   },
   pose: PHOTO_POSES.Idle,
   setPose: (pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES]) => set({ pose }),
-  categories: [],
   currentCategory: null,
   assets: [],
   lockedGroups: {},
@@ -122,7 +203,6 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     return user;
   },
   userLoading: false,
-  setCurrentCategory: (category: Category | null) => set({ currentCategory: category }),
   changeAsset: (category: string, asset: Asset | null) => {
     set((state) => ({
       customization: {
@@ -201,13 +281,6 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       set({ loadingName: false });
     }
   },
-  fetchUserCharacter: async (user_id: string) => {
-    const userCharacter = await pb.collection("user_character").getFirstListItem<UserCharacterExpandedCharacter>(`user_id="${user_id}"`, {
-      expand: 'character_id'
-    });
-
-    set({ character: userCharacter.expand.character_id });
-  },
   createCharacterLoading: false,
   createCharacter: async (name: string) => {
     set({ createCharacterLoading: true });
@@ -227,12 +300,20 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       });
 
       set({ character: character.expand.character_id });
+      await pb.collection('user_level').create({
+        user_id: user.id,
+        level: 1,
+      });
+      await pb.collection('user_xp').create({
+        user_id: user.id,
+        xp: 0,
+      });
     } catch (error) {
       console.error(error)
     } finally {
       set({ createCharacterLoading: false });
     }
-  }
+  },
 }));
 
 console.log(useConfiguratorStore.getState())

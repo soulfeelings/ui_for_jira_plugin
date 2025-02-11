@@ -1,7 +1,7 @@
 import { Canvas, Vector3 } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { Leva } from "leva";
-import { DEFAULT_CAMERA_POSITION } from "./components/CameraManager.jsx";
+import { DEFAULT_CAMERA_POSITION } from "./components/CameraManager";
 import { Experience } from "./components/Experience.jsx";
 import { UI } from "./components/UI.jsx";
 import { useConfiguratorStore } from "./store";
@@ -16,14 +16,13 @@ function App() {
     return <ScreenLoader />
   }
 
-  console.log(character)
   if (!character?.name) {
     return <CharacterNameForm />
   }
 
   return (
     <>
-      <Leva hidden />
+      <Leva />
       <UI />
       <Canvas
         camera={{

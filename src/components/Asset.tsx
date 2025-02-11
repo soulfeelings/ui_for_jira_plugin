@@ -1,9 +1,19 @@
 import { useGLTF } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { useConfiguratorStore } from "../store";
+import * as THREE from "three";
 
-export const Asset = ({ url, categoryName, skeleton }) => {
-  const { scene } = useGLTF(url);
+export const Asset = ({
+  url,
+  categoryName,
+  skeleton
+}: {
+  url: string;
+  categoryName: string;
+  skeleton: THREE.Skeleton;
+}) => {
+  const gltf = useGLTF(url);
+  const scene = gltf.scene;
 
   const customization = useConfiguratorStore((state) => state.customization);
   const lockedGroups = useConfiguratorStore((state) => state.lockedGroups);
@@ -14,8 +24,11 @@ export const Asset = ({ url, categoryName, skeleton }) => {
 
   useEffect(() => {
     scene.traverse((child) => {
+      // @ts-ignore
       if (child.isMesh) {
-        if (child.material?.name.includes("Color_")) {
+        // @ts-ignore
+        if (child.material && 'name' in child.material && child.material.name.includes("Color_")) {
+          // @ts-ignore
           child.material.color.set(assetColor);
         }
       }
@@ -23,15 +36,28 @@ export const Asset = ({ url, categoryName, skeleton }) => {
   }, [assetColor, scene]);
 
   const attachedItems = useMemo(() => {
-    const items = [];
+    const items: {
+      geometry: THREE.BufferGeometry;
+      material: THREE.Material;
+      morphTargetDictionary: Record<string, number>;
+      morphTargetInfluences: number[];
+    }[] = [];
+
     scene.traverse((child) => {
+      // @ts-ignore
       if (child.isMesh) {
+        // @ts-ignore
         items.push({
+          // @ts-ignore
           geometry: child.geometry,
+          // @ts-ignore
           material: child.material.name.includes("Skin_")
             ? skin
+            // @ts-ignore
             : child.material,
+          // @ts-ignore
           morphTargetDictionary: child.morphTargetDictionary,
+          // @ts-ignore
           morphTargetInfluences: child.morphTargetInfluences,
         });
       }

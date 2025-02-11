@@ -1,5 +1,5 @@
 
-import { User, UserCharacterExpandedCharacter } from "./apiTypes";
+import { Level, User, UserLevel, UserXp } from "./apiTypes";
 import { Character } from "./apiTypes";
 import { MeshStandardMaterial } from "three";
 export const PHOTO_POSES = {
@@ -15,17 +15,22 @@ export const PHOTO_POSES = {
 export const UI_MODES = {
     PHOTO: "photo",
     CUSTOMIZE: "customize",
+    LEVEL: "level",
 };
 
 
-export interface Category {
+export interface CategoryExpandedDefaultAsset {
     id: string;
     name: string;
-    removable?: boolean;
-    assets: Asset[];
-    expand?: {
-        colorPalette?: {
-            colors: string[];
+    default_asset_id: string;
+    createdAt: string;
+    updatedAt: string;
+    expand: {
+        default_asset_id: {
+            id: string;
+            name: string;
+            group: string;
+            lockedGroups?: string[];
         };
     };
 }
@@ -33,8 +38,27 @@ export interface Category {
 export interface Asset {
     id: string;
     name: string;
-    group: string;
-    lockedGroups?: string[];
+    image: string;
+    file: string;
+    category_id: string;
+    price: number;
+    default_color_id: string;
+    createdAt: string;
+    updatedAt: string;
+    expand?: {
+        default_color?: {
+            id: string;
+            name: string;
+        };
+    };
+}
+
+export interface Color {
+    id: string;
+    name: string;
+    hex_value: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface Customization {
@@ -56,20 +80,38 @@ export interface ConfiguratorStore {
     initialDataLoaded: boolean;
     character: Character | null;
     user: User | null;
+    user_level: UserLevel | null;
+    user_xp: UserXp | null;
+    levels: Level[] | null;
+    categories: CategoryExpandedDefaultAsset[];
 
-    // methods
-    fetchInitialData: () => Promise<void>;
+    // loading states
+    loading: boolean;
     loadingCharacter: boolean;
+    loadingUser: boolean;
+    loadingCategories: boolean;
+    loadingLevels: boolean;
+    loadingUserLevel: boolean;
+    loadingUserXp: boolean;
+
+    // controller methods
+    fetchInitialData: () => Promise<void>;
+    fetchCategories: () => Promise<void>;
+    fetchLevels: () => Promise<void>;
+    fetchUserLevel: () => Promise<void>;
+    fetchUserXp: () => Promise<void>;
+
+    // setters
+    setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;
+    setCustomization: (customization: Customization) => void;
+
     updateCharacter: (character: Character) => Promise<void>;
     updateUser: (user: User) => Promise<void>;
-    loadingUser: boolean;
-    loading: boolean;
     mode: typeof UI_MODES[keyof typeof UI_MODES];
     setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => void;
     pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES];
     setPose: (pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES]) => void;
-    categories: Category[];
-    currentCategory: Category | null;
+    currentCategory: CategoryExpandedDefaultAsset | null;
     assets: Asset[];
     lockedGroups: LockedGroups;
     skin: MeshStandardMaterial;
@@ -82,7 +124,6 @@ export interface ConfiguratorStore {
     updateSkin: (color: string) => void;
     fetchUser: () => Promise<User | undefined>;
     userLoading: boolean;
-    setCurrentCategory: (category: Category) => void;
     changeAsset: (category: string, asset: Asset | null) => void;
     randomize: () => void;
     applyLockedAssets: () => void;
