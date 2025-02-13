@@ -15,10 +15,10 @@ export const Asset = ({
   const gltf = useGLTF(url);
   const scene = gltf.scene;
 
-  const customization = useConfiguratorStore((state) => state.customization);
+  const userCharacterCustomization = useConfiguratorStore((state) => state.userCharacterCustomization);
   const lockedGroups = useConfiguratorStore((state) => state.lockedGroups);
 
-  const assetColor = customization[categoryName].color;
+  const assetColor = userCharacterCustomization?.customization[categoryName].color;
 
   const skin = useConfiguratorStore((state) => state.skin);
 

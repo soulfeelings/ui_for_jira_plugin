@@ -10,7 +10,7 @@ export const CharacterNameForm = () => {
     const [name, setName] = useState("");
     const [error, setError] = useState(NAME_ERROR);
 
-    const { loadingName, createCharacterLoading, createCharacter } = useConfiguratorStore();
+    const { loadingName, loadingCreateCharacter: createCharacterLoading, createCharacter } = useConfiguratorStore();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;

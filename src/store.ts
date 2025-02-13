@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { MeshStandardMaterial } from "three";
 import PocketBase from "pocketbase";
 import { User, Character, UserCharacterExpandedCharacter, Level, UserLevel, UserXp } from "./apiTypes";
-import { ConfiguratorStore, PHOTO_POSES, UI_MODES, Asset, CategoryExpandedDefaultAsset, Customization } from "./store_types";
+import { PHOTO_POSES, UI_MODES, Asset, CategoryExpandedDefaultAsset, Customization, LockedGroups, UserCharacterCustomization } from "./store_types";
 
 
 const pocketBaseUrl = import.meta.env?.VITE_POCKETBASE_URL;
@@ -19,10 +19,20 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   initialDataLoaded: false,
   character: null,
   user: null,
+  user_character_id: null,
   user_level: null,
   user_xp: null,
   levels: [],
   categories: [],
+  isMobile: window.innerWidth < 768,
+  selectedAsset: null,
+  userCharacterCustomization: null,
+  mode: UI_MODES.SHOP,
+  pose: PHOTO_POSES.Idle,
+  currentCategory: null,
+  assets: [],
+  lockedGroups: {},
+  skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
 
   // loading states
   loading: false,
@@ -32,13 +42,20 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   loadingLevels: false,
   loadingUserLevel: false,
   loadingUserXp: false,
+  loadingAssets: false,
+  loadingUserCharacterCustomization: false,
+  loadingName: false,
+  loadingCreateCharacter: false,
 
   // setters
   setCurrentCategory: (category: CategoryExpandedDefaultAsset) => set({ currentCategory: category }),
-  setCustomization: (customization: Customization) => set({ customization }),
+  setUserCharacterCustomization: (customization: UserCharacterCustomization) => set({ userCharacterCustomization: customization }),
   setUserLevel: (level: UserLevel) => set({ user_level: level }),
   setUserXp: (xp: UserXp) => set({ user_xp: xp }),
   setLevels: (levels: Level[]) => set({ levels }),
+  setIsMobile: (isMobile: boolean) => set({ isMobile }),
+  setAssets: (assets: Asset[]) => set({ assets }),
+  setSelectedAsset: (asset: Asset | null) => set({ selectedAsset: asset }),
 
   // controller methods
   fetchLevels: async () => {
@@ -64,15 +81,31 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       console.log('user', user);
       if (user) {
         await get().fetchUserCharacter(user.id)
-        const character = get().character
-        if (character) {
-          console.log('character', character);
+        const userCharacterId = get().user_character_id
+        if (userCharacterId) {
+          console.log('userCharacterId', userCharacterId);
+
           await Promise.all([
             get().fetchCategories(),
+            get().fetchUserCharacterCustomization(userCharacterId),
+            get().fetchAssets(),
             get().fetchLevels(),
             get().fetchUserLevel(),
             get().fetchUserXp()
           ]);
+
+          const userCharacterCustomization = get().userCharacterCustomization
+          if (!userCharacterCustomization && userCharacterId) {
+            const categories = get().categories;
+            await get().createUserCharacterCustomization(userCharacterId, categories.reduce((acc, category) => ({
+              ...acc,
+              [category.name]: {
+                asset: category.expand.default_asset_id,
+                color: '#000000'
+              }
+            }), {}))
+
+          }
         }
       }
     } catch (error) {
@@ -115,13 +148,6 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       });
 
       set({ categories: records });
-      get().setCustomization(records.reduce((acc, category) => ({
-        ...acc,
-        [category.name]: {
-          asset: category.expand.default_asset_id,
-          color: '#000000'
-        }
-      }), {}))
     } catch (error) {
       console.error(error)
     } finally {
@@ -133,7 +159,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       expand: 'character_id'
     });
 
-    set({ character: userCharacter.expand.character_id });
+    set({ character: userCharacter.expand.character_id, user_character_id: userCharacter.id });
   },
 
   updateCharacter: async (character: Character) => {
@@ -141,53 +167,17 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     set({ character: newCharacter })
   },
 
-  updateUser: async () => {
-    // const newUser = await pb.collection('users').update(user.id, user);
-    // set({
-    //   user: {
-    //     ...get().user,
-    //     ...newUser
-    //   }
-    // })
-  },
-
-  mode: UI_MODES.LEVEL,
   setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => {
     set({ mode });
     if (mode === UI_MODES.CUSTOMIZE) {
       set({ pose: PHOTO_POSES.Idle });
     }
   },
-  pose: PHOTO_POSES.Idle,
-  setPose: (pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES]) => set({ pose }),
-  currentCategory: null,
-  assets: [],
-  lockedGroups: {},
-  skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
-  customization: {},
-  download: () => { },
-  setDownload: (download: () => void) => set({ download }),
-  screenshot: () => { },
-  setScreenshot: (screenshot: () => void) => set({ screenshot }),
-  updateColor: (color: string) => {
-    set((state) => ({
-      customization: {
-        ...state.customization,
-        [state.currentCategory?.name || '']: {
-          ...state.customization[state.currentCategory?.name || ''],
-          color,
-        },
-      },
-    }));
-    if (get().currentCategory?.name === "Head") {
-      get().updateSkin(color);
-    }
-  },
-  updateSkin: (color) => {
+  updateSkin: (color: string) => {
     get().skin.color.set(color);
   },
   fetchUser: async () => {
-    set({ userLoading: true });
+    set({ loadingUser: true });
     let user: User | undefined;
     try {
       const respone = await pb.collection("users").authWithPassword<User>('test@test.com', 'testtest');
@@ -197,77 +187,11 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     } catch (error) {
       console.error(error)
     } finally {
-      set({ userLoading: false });
+      set({ loadingUser: false });
     }
 
     return user;
   },
-  userLoading: false,
-  changeAsset: (category: string, asset: Asset | null) => {
-    set((state) => ({
-      customization: {
-        ...state.customization,
-        [category]: {
-          ...state.customization[category],
-          asset,
-        },
-      },
-    }));
-    get().applyLockedAssets();
-  },
-  randomize: () => {
-    // const customization = {};
-    // get().categories.forEach((category) => {
-    //   let randomAsset = category.assets[randInt(0, category.assets.length - 1)];
-    //   if (category.removable) {
-    //     if (randInt(0, category.assets.length - 1) === 0) {
-    //       randomAsset = { id: };
-    //     }
-    //   }
-    //   const randomColor =
-    //     category.expand?.colorPalette?.colors?.[
-    //     randInt(0, category.expand.colorPalette.colors.length - 1)
-    //     ];
-    //   customization[category.name] = {
-    //     asset: randomAsset,
-    //     color: randomColor,
-    //   };
-    //   if (category.name === "Head") {
-    //     get().updateSkin(randomColor);
-    //   }
-    // });
-    // set({ customization });
-    // get().applyLockedAssets();
-  },
-
-  applyLockedAssets: () => {
-    // const customization = get().customization;
-    // const categories = get().categories;
-    // const lockedGroups = {};
-
-    // Object.values(customization).forEach((category) => {
-    //   if (category.asset?.lockedGroups) {
-    //     category.asset.lockedGroups.forEach((group) => {
-    //       const categoryName = categories.find(
-    //         (category) => category.id === group
-    //       ).name;
-    //       if (!lockedGroups[categoryName]) {
-    //         lockedGroups[categoryName] = [];
-    //       }
-    //       const lockingAssetCategoryName = categories.find(
-    //         (cat) => cat.id === category.asset.group
-    //       ).name;
-    //       lockedGroups[categoryName].push({
-    //         name: category.asset.name,
-    //         categoryName: lockingAssetCategoryName,
-    //       });
-    //     });
-    //   }
-    // });
-
-    // set({ lockedGroups });
-  },
-  loadingName: false,
   saveName: async (name) => {
     set({ loadingName: true });
     const data = {
@@ -281,9 +205,8 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       set({ loadingName: false });
     }
   },
-  createCharacterLoading: false,
   createCharacter: async (name: string) => {
-    set({ createCharacterLoading: true });
+    set({ loadingCreateCharacter: true });
 
     try {
       const user = get().user;
@@ -311,10 +234,131 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     } catch (error) {
       console.error(error)
     } finally {
-      set({ createCharacterLoading: false });
+      set({ loadingCreateCharacter: false });
     }
   },
-}));
+  fetchAssets: async () => {
+    set({ loadingAssets: true });
+    try {
+      const assets = await pb.collection('assets').getFullList<Asset>({
+        sort: '-created',
+      });
+
+      set({ assets });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingAssets: false });
+    }
+  },
+  fetchUserCharacterCustomization: async (user_character_id: string) => {
+    set({ loadingUserCharacterCustomization: true });
+    try {
+      const customization = await pb.collection('character_customization_json').getFirstListItem<UserCharacterCustomization>(`user_character_id="${user_character_id}"`);
+      set({ userCharacterCustomization: customization });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingUserCharacterCustomization: false });
+    }
+  },
+  updateUserCharacterCustomization: async (user_character_id: string, customization: Customization) => {
+    set({ loadingUserCharacterCustomization: true });
+    try {
+      const updated = await pb.collection('character_customization_json').update<UserCharacterCustomization>(user_character_id, { customization: JSON.stringify(customization) });
+      set({ userCharacterCustomization: { ...updated } });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingUserCharacterCustomization: false });
+    }
+  },
+  createUserCharacterCustomization: async (user_character_id: string, customization: Customization) => {
+    set({ loadingUserCharacterCustomization: true });
+    try {
+      const created = await pb.collection('character_customization_json').create<UserCharacterCustomization>({ user_character_id, customization: JSON.stringify(customization) });
+      set({ userCharacterCustomization: { ...created } });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingUserCharacterCustomization: false });
+    }
+  }
+}))
 
 console.log(useConfiguratorStore.getState())
 useConfiguratorStore.getState().fetchInitialData()
+
+const debounce = (func: () => void, delay: number) => {
+  let timeout: number;
+  return () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(func, delay);
+  };
+}
+const checkIsMobileDebounced = debounce(() => {
+  useConfiguratorStore.getState().setIsMobile(window.innerWidth < 768)
+}, 100)
+
+window.addEventListener('resize', checkIsMobileDebounced)
+
+
+
+export interface ConfiguratorStore {
+  // initial data
+  initialDataLoaded: boolean;
+  character: Character | null;
+  user_character_id: string | null;
+  user: User | null;
+  user_level: UserLevel | null;
+  user_xp: UserXp | null;
+  levels: Level[] | null;
+  categories: CategoryExpandedDefaultAsset[];
+  isMobile: boolean;
+  assets: Asset[];
+  selectedAsset: Asset | null;
+  userCharacterCustomization: UserCharacterCustomization | null;
+  pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES];
+  currentCategory: CategoryExpandedDefaultAsset | null;
+  lockedGroups: LockedGroups;
+  skin: MeshStandardMaterial;
+  mode: typeof UI_MODES[keyof typeof UI_MODES];
+
+  // loading states
+  loading: boolean;
+  loadingCharacter: boolean;
+  loadingUser: boolean;
+  loadingCategories: boolean;
+  loadingLevels: boolean;
+  loadingUserLevel: boolean;
+  loadingUserXp: boolean;
+  loadingAssets: boolean;
+  loadingUserCharacterCustomization: boolean;
+  loadingName: boolean;
+  loadingCreateCharacter: boolean;
+
+
+  // controller methods
+  fetchInitialData: () => Promise<void>;
+  fetchCategories: () => Promise<void>;
+  fetchAssets: () => Promise<void>;
+  fetchLevels: () => Promise<void>;
+  fetchUserLevel: () => Promise<void>;
+  fetchUserXp: () => Promise<void>;
+  fetchUserCharacterCustomization: (user_character_id: string) => Promise<void>;
+  updateUserCharacterCustomization: (user_character_id: string, customization: Customization) => Promise<void>;
+  createUserCharacterCustomization: (user_character_id: string, customization: Customization) => Promise<void>;
+  fetchUser: () => Promise<User | undefined>;
+  fetchUserCharacter: (user_id: string) => Promise<void>;
+  createCharacter: (name: string) => Promise<void>;
+  updateCharacter: (character: Character) => Promise<void>;
+  saveName: (name: string) => Promise<void>;
+
+  // setters
+  setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;
+  setUserCharacterCustomization: (customization: UserCharacterCustomization) => void;
+  setIsMobile: (isMobile: boolean) => void;
+  setAssets: (assets: Asset[]) => void;
+  setSelectedAsset: (asset: Asset | null) => void;
+  setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => void;
+}

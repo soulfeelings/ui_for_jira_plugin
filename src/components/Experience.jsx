@@ -14,7 +14,6 @@ import { CameraManager } from "./CameraManager";
 import { LoadingAvatar } from "./LoadingAvatar";
 
 export const Experience = () => {
-  const setScreenshot = useConfiguratorStore((state) => state.setScreenshot);
   const gl = useThree((state) => state.gl);
   useEffect(() => {
     const screenshot = () => {
@@ -46,8 +45,7 @@ export const Experience = () => {
         const date = new Date();
         link.setAttribute(
           "download",
-          `Avatar_${
-            date.toISOString().split("T")[0]
+          `Avatar_${date.toISOString().split("T")[0]
           }_${date.toLocaleTimeString()}.png`
         );
         link.setAttribute(
@@ -59,7 +57,8 @@ export const Experience = () => {
         link.click();
       };
     };
-    setScreenshot(screenshot);
+    // TODO: maybe goog idea to stay with it to share user character customization
+    // setScreenshot(screenshot);
   }, [gl]);
 
   const { active } = useProgress();

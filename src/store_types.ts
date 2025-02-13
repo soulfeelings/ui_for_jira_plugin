@@ -1,7 +1,3 @@
-
-import { Level, User, UserLevel, UserXp } from "./apiTypes";
-import { Character } from "./apiTypes";
-import { MeshStandardMaterial } from "three";
 export const PHOTO_POSES = {
     Idle: "Idle",
     Chill: "Chill",
@@ -16,6 +12,7 @@ export const UI_MODES = {
     PHOTO: "photo",
     CUSTOMIZE: "customize",
     LEVEL: "level",
+    SHOP: "shop",
 };
 
 
@@ -75,61 +72,18 @@ export interface LockedGroups {
     }>;
 }
 
-export interface ConfiguratorStore {
-    // initial data
-    initialDataLoaded: boolean;
-    character: Character | null;
-    user: User | null;
-    user_level: UserLevel | null;
-    user_xp: UserXp | null;
-    levels: Level[] | null;
-    categories: CategoryExpandedDefaultAsset[];
+export interface ApiUserCharacterCustomization {
+    id: string;
+    user_character_id: string;
+    customization: string; // a json field
+    created: string;
+    updated: string;
+}
 
-    // loading states
-    loading: boolean;
-    loadingCharacter: boolean;
-    loadingUser: boolean;
-    loadingCategories: boolean;
-    loadingLevels: boolean;
-    loadingUserLevel: boolean;
-    loadingUserXp: boolean;
-
-    // controller methods
-    fetchInitialData: () => Promise<void>;
-    fetchCategories: () => Promise<void>;
-    fetchLevels: () => Promise<void>;
-    fetchUserLevel: () => Promise<void>;
-    fetchUserXp: () => Promise<void>;
-
-    // setters
-    setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;
-    setCustomization: (customization: Customization) => void;
-
-    updateCharacter: (character: Character) => Promise<void>;
-    updateUser: (user: User) => Promise<void>;
-    mode: typeof UI_MODES[keyof typeof UI_MODES];
-    setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => void;
-    pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES];
-    setPose: (pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES]) => void;
-    currentCategory: CategoryExpandedDefaultAsset | null;
-    assets: Asset[];
-    lockedGroups: LockedGroups;
-    skin: MeshStandardMaterial;
+export interface UserCharacterCustomization {
+    id: string;
+    user_character_id: string;
     customization: Customization;
-    download: () => void;
-    setDownload: (download: () => void) => void;
-    screenshot: () => void;
-    setScreenshot: (screenshot: () => void) => void;
-    updateColor: (color: string) => void;
-    updateSkin: (color: string) => void;
-    fetchUser: () => Promise<User | undefined>;
-    userLoading: boolean;
-    changeAsset: (category: string, asset: Asset | null) => void;
-    randomize: () => void;
-    applyLockedAssets: () => void;
-    loadingName: boolean;
-    saveName: (name: string) => Promise<void>;
-    createCharacter: (name: string) => Promise<void>;
-    createCharacterLoading: boolean;
-    fetchUserCharacter: (user_id: string) => Promise<void>;
+    created: string;
+    updated: string;
 }

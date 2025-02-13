@@ -12,7 +12,7 @@ export const Avatar = ({ ...props }) => {
   const group = useRef<Group<Object3DEventMap>>(null);
   const { nodes } = useGLTF("/models/Armature.glb");
   // const { animations } = useGLTF("/models/Poses.glb");
-  const customization = useConfiguratorStore((state) => state.customization);
+  const userCharacterCustomization = useConfiguratorStore((state) => state.userCharacterCustomization);
   // const { actions } = useAnimations(animations, group);
   // const setDownload = useConfiguratorStore((state) => state.setDownload);
 
@@ -84,15 +84,15 @@ export const Avatar = ({ ...props }) => {
       <group name="Scene">
         <group name="Armature" rotation={[Math.PI / 2, 0, 0]} scale={0.01}>
           <primitive object={nodes.mixamorigHips} />
-          {Object.keys(customization).map(
+          {userCharacterCustomization?.customization && Object.keys(userCharacterCustomization.customization).map(
             (key) =>
-              customization[key]?.asset?.file && (
-                <Suspense key={customization[key].asset.id}>
+              userCharacterCustomization.customization[key]?.asset?.file && (
+                <Suspense key={userCharacterCustomization.customization[key].asset.id}>
                   <Asset
                     categoryName={key}
                     url={pb.files.getUrl(
-                      customization[key].asset,
-                      customization[key].asset.file
+                      userCharacterCustomization.customization[key].asset,
+                      userCharacterCustomization.customization[key].asset.file
                     )}
                     // @ts-ignore
                     skeleton={nodes.Plane.skeleton}
