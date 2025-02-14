@@ -33,6 +33,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   assets: [],
   lockedGroups: {},
   skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
+  cantAffordSelectedItem: false,
 
   // loading states
   loading: false,
@@ -56,6 +57,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   setIsMobile: (isMobile: boolean) => set({ isMobile }),
   setAssets: (assets: Asset[]) => set({ assets }),
   setSelectedAsset: (asset: Asset | null) => set({ selectedAsset: asset }),
+  setCantAffordSelectedItem: (cantAffordSelectedItem: boolean) => set({ cantAffordSelectedItem }),
 
   // controller methods
   fetchLevels: async () => {
@@ -131,6 +133,21 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     set({ loadingUserXp: true });
     try {
       const userXp = await pb.collection('user_xp').getFirstListItem<UserXp>(`user_id="${get().user?.id}"`);
+      set({ user_xp: userXp });
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ loadingUserXp: false });
+    }
+  },
+  updateUserXp: async (newXp: number) => {
+    const userXpId = get().user_xp?.id;
+    if (!userXpId) {
+      throw new Error('User XP ID not found');
+    }
+    set({ loadingUserXp: true });
+    try {
+      const userXp = await pb.collection('user_xp').update<UserXp>(userXpId, { xp: newXp });
       set({ user_xp: userXp });
     } catch (error) {
       console.error(error)
@@ -265,6 +282,22 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   updateUserCharacterCustomization: async (user_character_id: string, customization: Customization) => {
     set({ loadingUserCharacterCustomization: true });
     try {
+      const userXp = get().user_xp;
+      const selectedAsset = get().selectedAsset;
+      if (!userXp || !selectedAsset) {
+        throw new Error('User XP or selected asset not found');
+      }
+      if (userXp.xp < selectedAsset.price) {
+        set({ cantAffordSelectedItem: true });
+        alert('User cant afford this item');
+        return;
+      }
+
+      const restUserXp = userXp.xp - selectedAsset.price;
+      if (restUserXp !== 0) {
+        await get().updateUserXp(restUserXp);
+      }
+
       const updated = await pb.collection('character_customization_json').update<UserCharacterCustomization>(user_character_id, { customization: JSON.stringify(customization) });
       set({ userCharacterCustomization: { ...updated } });
     } catch (error) {
@@ -323,6 +356,7 @@ export interface ConfiguratorStore {
   lockedGroups: LockedGroups;
   skin: MeshStandardMaterial;
   mode: typeof UI_MODES[keyof typeof UI_MODES];
+  cantAffordSelectedItem: boolean;
 
   // loading states
   loading: boolean;
@@ -345,6 +379,7 @@ export interface ConfiguratorStore {
   fetchLevels: () => Promise<void>;
   fetchUserLevel: () => Promise<void>;
   fetchUserXp: () => Promise<void>;
+  updateUserXp: (newXp: number) => Promise<void>;
   fetchUserCharacterCustomization: (user_character_id: string) => Promise<void>;
   updateUserCharacterCustomization: (user_character_id: string, customization: Customization) => Promise<void>;
   createUserCharacterCustomization: (user_character_id: string, customization: Customization) => Promise<void>;

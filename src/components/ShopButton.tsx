@@ -9,7 +9,7 @@ export const ShopButton = ({ onClick }: { onClick: () => void }) => {
             <div className="group fixed bottom-0 left-0 right-0 p-4 flex justify-stretch items-center">
                 <button
                     onClick={onClick}
-                    className="p-4 bg-[#EFEAE0] hover:bg-[#7D4B22]/80 text-white text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-md hover:translate-y-[2px] active:shadow-sm active:translate-y-[4px] flex gap-2 items-center justify-start w-full"
+                    className="pointer-events-auto disabled:opacity-50 p-4 bg-[#EFEAE0] hover:bg-[#7D4B22]/80 text-white text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-md hover:translate-y-[2px] active:shadow-sm active:translate-y-[4px] flex gap-2 items-center justify-start w-full"
                 >
                     <svg
                         className="fill-current text-[#7F512F] group-hover:text-[#EFEAE0] transition-all duration-300"
@@ -31,7 +31,7 @@ export const ShopButton = ({ onClick }: { onClick: () => void }) => {
     return (
         <button
             onClick={onClick}
-            className="group pointer-events-auto w-[100px] h-[100px] bg-[#EFEAE0] hover:bg-[#7D4B22]/80 text-white text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-md hover:translate-y-[2px] active:shadow-sm active:translate-y-[4px] flex flex-col items-center justify-center gap-2"
+            className="disabled:opacity-50 group pointer-events-auto w-[100px] h-[100px] bg-[#EFEAE0] hover:bg-[#7D4B22]/80 text-white text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-md hover:translate-y-[2px] active:shadow-sm active:translate-y-[4px] flex flex-col items-center justify-center gap-2"
         >
             {/* change color of svg */}
             <svg

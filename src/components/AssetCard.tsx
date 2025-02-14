@@ -5,12 +5,13 @@ interface AssetCardProps {
     asset: Asset;
     isSelected: boolean;
     onClick: (asset: Asset) => void;
+    isDisabled: boolean;
 }
 
-export const AssetCard = ({ asset, isSelected, onClick }: AssetCardProps) => {
+export const AssetCard = ({ asset, isSelected, onClick, isDisabled }: AssetCardProps) => {
     return (
         <div
-            className={`cursor-pointer w-[137px] h-[174px] min-w-[137px] min-h-[174px] border p-[16px] rounded-[25px] 
+            className={`${isDisabled && 'opacity-[0.5] pointer-events-none'} cursor-pointer w-[137px] h-[174px] min-w-[137px] min-h-[174px] border p-[16px] rounded-[25px] 
           ${isSelected ? "border-[#B1ABA0] border-4" : "border-0"} 
           flex flex-col items-center justify-center gap-2 bg-[#EBE6DD]`}
             onClick={() => onClick(asset)}

@@ -1,15 +1,7 @@
-import { pb, useConfiguratorStore } from "@/store";
-import React, { useEffect, useState } from "react";
+import { useConfiguratorStore } from "@/store";
+import React, { useEffect } from "react";
 import { BuyButton } from './BuyButton';
 import { AssetCard } from "./AssetCard";
-
-// Тип элемента магазина
-interface ShopItem {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-}
 
 export const Shop: React.FC = () => {
     const categories = useConfiguratorStore((state) => state.categories);
@@ -20,6 +12,7 @@ export const Shop: React.FC = () => {
     const setSelectedAsset = useConfiguratorStore((state) => state.setSelectedAsset);
     const isMobile = useConfiguratorStore((state) => state.isMobile);
     const currentCategoryAssets = assets.filter((asset) => asset.category_id === currentCategory?.id);
+    const userXpPoints = useConfiguratorStore((state) => state.user_xp?.xp);
 
     useEffect(() => {
         if (!currentCategory) {
@@ -49,12 +42,10 @@ export const Shop: React.FC = () => {
                         asset={item}
                         isSelected={selectedAsset?.id === item.id}
                         onClick={setSelectedAsset}
+                        isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
                     />
                 ))}
-                <BuyButton
-                    selectedAsset={selectedAsset}
-                    currentCategory={currentCategory}
-                />
+                <BuyButton />
             </div>
         </div>
     );

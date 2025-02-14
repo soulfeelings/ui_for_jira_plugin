@@ -53,6 +53,19 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
   useEffect(() => {
     if (!controls.current) return;
 
+    if (isMobile) {
+      controls.current.setLookAt(
+        MODE_CAMERA_POSITIONS.mobile[mode].start[0],
+        MODE_CAMERA_POSITIONS.mobile[mode].start[1],
+        MODE_CAMERA_POSITIONS.mobile[mode].start[2],
+        MODE_CAMERA_POSITIONS.mobile[mode].target[0],
+        MODE_CAMERA_POSITIONS.mobile[mode].target[1],
+        MODE_CAMERA_POSITIONS.mobile[mode].target[2],
+        true
+      );
+      return;
+    }
+
     if (initialLoading) {
       // controls.current.setLookAt(
       //   START_CAMERA_POSITION[0],
@@ -66,46 +79,23 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
       !loading &&
       mode === UI_MODES.CUSTOMIZE
       // currentCategory?.expand?.cameraPlacement
+      // TODO: make change camera view when change category
     ) {
       // controls.current.setLookAt(
       //   ...currentCategory.expand.cameraPlacement.position,
       //   ...currentCategory.expand.cameraPlacement.target,
       //   true
       // );
-    } else if (
-      !loading &&
-      (mode === UI_MODES.LEVEL || mode === UI_MODES.SHOP)
-    ) {
-      if (isMobile) {
-        controls.current.setLookAt(
-          MODE_CAMERA_POSITIONS.mobile[mode].start[0],
-          MODE_CAMERA_POSITIONS.mobile[mode].start[1],
-          MODE_CAMERA_POSITIONS.mobile[mode].start[2],
-          MODE_CAMERA_POSITIONS.mobile[mode].target[0],
-          MODE_CAMERA_POSITIONS.mobile[mode].target[1],
-          MODE_CAMERA_POSITIONS.mobile[mode].target[2],
-          true
-        );
-      } else {
-        controls.current.setLookAt(
-          MODE_CAMERA_POSITIONS.desktop[mode].start[0],
-          MODE_CAMERA_POSITIONS.desktop[mode].start[1],
-          MODE_CAMERA_POSITIONS.desktop[mode].start[2],
-          MODE_CAMERA_POSITIONS.desktop[mode].target[0],
-          MODE_CAMERA_POSITIONS.desktop[mode].target[1],
-          MODE_CAMERA_POSITIONS.desktop[mode].target[2],
-          true
-        );
-      }
     } else {
       controls.current.setLookAt(
-        DEFAULT_CAMERA_POSITION[0],
-        DEFAULT_CAMERA_POSITION[1],
-        DEFAULT_CAMERA_POSITION[2],
-        DEFAULT_CAMERA_TARGET[0],
-        DEFAULT_CAMERA_TARGET[1],
-        DEFAULT_CAMERA_TARGET[2],
-      )
+        MODE_CAMERA_POSITIONS.desktop[mode].start[0],
+        MODE_CAMERA_POSITIONS.desktop[mode].start[1],
+        MODE_CAMERA_POSITIONS.desktop[mode].start[2],
+        MODE_CAMERA_POSITIONS.desktop[mode].target[0],
+        MODE_CAMERA_POSITIONS.desktop[mode].target[1],
+        MODE_CAMERA_POSITIONS.desktop[mode].target[2],
+        true
+      );
     }
   }, [currentCategory, mode, initialLoading, loading, isMobile]);
 

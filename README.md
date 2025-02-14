@@ -1,8 +1,12 @@
-# React Three Fiber Ultimate Character Configurator
+TODO:
 
-Final repository
+~~1. Fix camera view when mobile version and is loading~~
 
-![Video thumbnail](http://img.youtube.com/vi/yA4BpGqT3-s/maxresdefault.jpg?w)
+2. If i cant afford item, it should be disabled
 
-[Video tutorial](https://youtu.be/yA4BpGqT3-s)
+~~3. If i Buy item, i should spend money from user_xp~~
+
+* Fix xp progress bar changes
+
+4. Make change camera view when change category
 
