@@ -7,7 +7,7 @@ import { UI } from "./components/UI.jsx";
 import { useConfiguratorStore } from "./store";
 import { CharacterNameForm } from "./components/CharacterNameForm.jsx";
 import { ScreenLoader } from "./components/ScreenLoader.jsx";
-
+import * as THREE from "three";
 
 function App() {
   const initialDataLoaded = useConfiguratorStore(state => state.initialDataLoaded);
@@ -34,14 +34,15 @@ function App() {
         }}
         shadows
       >
-        <color attach="background" args={["#130f30"]} />
-        <fog attach="fog" args={["#130f30", 10, 40]} />
+        {/* <scene background={new THREE.Color("#000000")}> */}
+        {/* <fog attach="fog" args={["black", 10, 40]} /> */}
         <group position-y={-1}>
           <Experience />
         </group>
-        <EffectComposer>
+        {/* <EffectComposer>
           <Bloom mipmapBlur luminanceThreshold={1.2} intensity={1.2} />
-        </EffectComposer>
+        </EffectComposer> */}
+        {/* </scene> */}
       </Canvas>
     </>
   );

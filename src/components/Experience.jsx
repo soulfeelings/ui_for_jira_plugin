@@ -12,6 +12,7 @@ import { useConfiguratorStore } from "../store";
 import { Avatar } from "./Avatar";
 import { CameraManager } from "./CameraManager";
 import { LoadingAvatar } from "./LoadingAvatar";
+import * as THREE from "three";
 
 export const Experience = () => {
   const gl = useThree((state) => state.gl);
@@ -91,12 +92,12 @@ export const Experience = () => {
       <CameraManager loading={loading} />
       {/*<Environment preset="sunset" environmentIntensity={0.3} />*/}
 
-      <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-0.31}>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#333" roughness={0.85} />
-      </mesh>
+      {/* <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-0.31}> */}
+      {/* <planeGeometry args={[100, 100]} /> */}
+      {/* <meshStandardMaterial color={new THREE.Color("#ffffff")} roughness={1} /> */}
+      {/* </mesh> */}
 
-      <SoftShadows size={52} samples={16} focus={0.5} />
+      {/* <SoftShadows size={52} samples={16} focus={0.5} /> */}
 
       {/* Key Light */}
       <directionalLight
@@ -126,6 +127,7 @@ export const Experience = () => {
           <Avatar />
         </animated.group>
       </AvatarWrapper>
+      {/* Platform where character stands */}
       <Gltf
         position-y={-0.31}
         src="/models/Teleporter Base.glb"

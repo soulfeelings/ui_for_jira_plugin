@@ -5,7 +5,12 @@ export default {
     fontFamily: {
       sans: ["Poppins", "sans-serif"],
     },
-    extend: {},
+    extend: {
+      colors: {
+        "button-color-bought": "#ABD64D",
+        "button-color-not-bought": "#F2C52E",
+      },
+    },
   },
   plugins: [],
 };

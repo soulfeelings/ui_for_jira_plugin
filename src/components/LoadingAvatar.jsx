@@ -1,11 +1,19 @@
 import { animated, useSpring } from "@react-spring/three";
 
 export const LoadingAvatar = ({ loading }) => {
-  const { positionY } = useSpring({
-    positionY: loading ? 0 : -4,
+  const { scaleY, opacity } = useSpring({
+    scaleY: loading ? 1 : 0,
+    opacity: loading ? 1 : 0,
+    config: { tension: 280, friction: 60 }
   });
   return (
-    <animated.group position-y={positionY}>
+    <animated.group
+      scale-y={scaleY}
+      scale-x={1}
+      scale-z={1}
+      position-y={-0.1}
+      opacity={opacity}
+    >
       <mesh>
         <cylinderGeometry args={[0.7, 0.7, 4]} />
         <meshStandardMaterial

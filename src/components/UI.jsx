@@ -131,7 +131,7 @@ export const UI = () => {
   // const user = useConfiguratorStore((state) => state.user);
 
   return (
-    <main className="pointer-events-none fixed z-10 inset-0 select-none">
+    <main className="fixed z-10 inset-0 select-none">
       <div className="mx-auto h-full max-w-screen-xl w-full flex flex-col justify-between">
         <div className={`fixed ${isMobile ? "top-10 left-[50%] -translate-x-1/2" : "top-1/2 -translate-y-1/2 right-16"}`}>
           {mode === UI_MODES.SHOP ? <Shop /> : <LevelComponent />}

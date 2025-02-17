@@ -13,7 +13,9 @@ export const Shop: React.FC = () => {
     const isMobile = useConfiguratorStore((state) => state.isMobile);
     const currentCategoryAssets = assets.filter((asset) => asset.category_id === currentCategory?.id);
     const userXpPoints = useConfiguratorStore((state) => state.user_xp?.xp);
+    const userCharacterCustomization = useConfiguratorStore((state) => state.userCharacterCustomization);
 
+    console.log(userCharacterCustomization,)
     useEffect(() => {
         if (!currentCategory) {
             setCurrentCategory(categories[0]);
@@ -40,6 +42,7 @@ export const Shop: React.FC = () => {
                     <AssetCard
                         key={item.id}
                         asset={item}
+                        isBought={userCharacterCustomization?.customization[currentCategory?.name ?? '']?.asset?.id === selectedAsset?.name}
                         isSelected={selectedAsset?.id === item.id}
                         onClick={setSelectedAsset}
                         isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
