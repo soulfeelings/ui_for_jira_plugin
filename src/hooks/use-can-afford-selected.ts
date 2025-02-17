@@ -6,7 +6,11 @@ export const useCanAffordSelected = () => {
     const selectedAsset = useConfiguratorStore((state) => state.selectedAsset);
 
     return useMemo(() => {
-        if (!userXp || !selectedAsset) {
+        if (!selectedAsset) {
+            return true;
+        }
+
+        if (!userXp) {
             return false;
         }
 

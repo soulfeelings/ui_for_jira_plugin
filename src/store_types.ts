@@ -20,6 +20,7 @@ export interface CategoryExpandedDefaultAsset {
     id: string;
     name: string;
     default_asset_id: string;
+    image: string;
     createdAt: string;
     updatedAt: string;
     expand: {

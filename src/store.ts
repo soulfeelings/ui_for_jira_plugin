@@ -27,7 +27,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   isMobile: window.innerWidth < 768,
   selectedAsset: null,
   userCharacterCustomization: null,
-  mode: UI_MODES.LEVEL,
+  mode: UI_MODES.SHOP,
   pose: PHOTO_POSES.Idle,
   currentCategory: null,
   assets: [],

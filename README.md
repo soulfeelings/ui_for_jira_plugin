@@ -9,6 +9,7 @@ TODO:
 ~~4. Fix xp progress bar changes~~
 
 5. Make as in design
+    - i need to make responsive design
 
 6. Make change camera view when change category
 
