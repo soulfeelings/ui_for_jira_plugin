@@ -8,10 +8,16 @@ TODO:
 
 ~~4. Fix xp progress bar changes~~
 
-5. Make as in design
-    - i need to make responsive design
+~~5. Make as in design~~ - i need to make responsive design
 
 6. Make change camera view when change category
 
+7. Integrate with jira in dev mode
 
+8. add all photos for categories
 
+9. Make to see all characters from your project
+
+9.1 Make to see concrete user character
+
+10. Make registration for all team members in jira when plugin is installed
