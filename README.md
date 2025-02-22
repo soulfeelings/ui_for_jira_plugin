@@ -10,14 +10,16 @@ TODO:
 
 ~~5. Make as in design~~ - i need to make responsive design
 
-6. Make change camera view when change category
+~~6. Make change camera view when change category~~
 
-7. Integrate with jira in dev mode
+7. add all photos for categories - IN PROGRESS
 
-8. add all photos for categories
+8. Integrate with jira in dev mode - IN PROGRESS
 
-9. Make to see all characters from your project
+8.1 Go through jira tutorials https://developer.atlassian.com/platform/forge/build-a-hello-world-app-in-jira/.
 
-9.1 Make to see concrete user character
+9. Make to see all characters from your project.
+
+9.1 Make to see concrete user character.
 
 10. Make registration for all team members in jira when plugin is installed

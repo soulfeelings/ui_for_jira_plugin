@@ -1,14 +1,17 @@
-import { CameraControls } from "@react-three/drei";
+import { CameraControls, FlyControls, OrbitControls } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { useConfiguratorStore } from "../store.ts";
 import { UI_MODES } from "../store_types.ts";
+import { button } from "leva";
+import { useControls } from "leva";
+import { Vector3 } from "three";
 
 
 const MODE_CAMERA_POSITIONS = {
   desktop: {
     [UI_MODES.CUSTOMIZE]: { start: [2, 0, 10], target: [2, 0, 0] },
     [UI_MODES.LEVEL]: { start: [2, 0, 10], target: [2, 0, 0] },
-    [UI_MODES.SHOP]: { start: [2, 0, 10], target: [2, 0, 0] },
+    [UI_MODES.SHOP]: { start: [-2.8352721771146134, 0.17593017066925046, 3.784070764173101], target: [2, 0, 0] },
   },
   mobile: {
     [UI_MODES.CUSTOMIZE]: { start: [0, 0, 10], target: [0, 0, 0] },
@@ -29,26 +32,26 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
   const mode = useConfiguratorStore((state) => state.mode);
   const isMobile = useConfiguratorStore((state) => state.isMobile);
 
-  // useControls({
-  //   getCameraPosition: button(() => {
-  //     if (!controls.current) {
-  //       console.warn('Controls not initialized');
-  //       return;
-  //     }
-  //     const position = new Vector3();
-  //     controls.current.getPosition(position);
-  //     console.log("Camera Position:", position);
-  //   }),
-  //   getCameraTarget: button(() => {
-  //     if (!controls.current) {
-  //       console.warn('Controls not initialized');
-  //       return;
-  //     }
-  //     const target = new Vector3();
-  //     controls.current.getTarget(target);
-  //     console.log("Camera Target:", target);
-  //   }),
-  // });
+  useControls({
+    getCameraPosition: button(() => {
+      if (!controls.current) {
+        console.warn('Controls not initialized');
+        return;
+      }
+      const position = new Vector3();
+      controls.current.getPosition(position);
+      console.log("Camera Position:", position);
+    }),
+    getCameraTarget: button(() => {
+      if (!controls.current) {
+        console.warn('Controls not initialized');
+        return;
+      }
+      const target = new Vector3();
+      controls.current.getTarget(target);
+      console.log("Camera Target:", target);
+    }),
+  });
 
   useEffect(() => {
     if (!controls.current) return;
@@ -66,26 +69,21 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
       return;
     }
 
-    if (initialLoading) {
-      // controls.current.setLookAt(
-      //   START_CAMERA_POSITION[0],
-      //   START_CAMERA_POSITION[1],
-      //   START_CAMERA_POSITION[2],
-      //   DEFAULT_CAMERA_TARGET[0],
-      //   DEFAULT_CAMERA_TARGET[1],
-      //   DEFAULT_CAMERA_TARGET[2]
-      // );
-    } else if (
+    if (
       !loading &&
-      mode === UI_MODES.CUSTOMIZE
-      // currentCategory?.expand?.cameraPlacement
+      mode === UI_MODES.SHOP &&
+      currentCategory?.cameraPlacementJSON
       // TODO: make change camera view when change category
     ) {
-      // controls.current.setLookAt(
-      //   ...currentCategory.expand.cameraPlacement.position,
-      //   ...currentCategory.expand.cameraPlacement.target,
-      //   true
-      // );
+      controls.current.setLookAt(
+        currentCategory.cameraPlacementJSON.start.x,
+        currentCategory.cameraPlacementJSON.start.y,
+        currentCategory.cameraPlacementJSON.start.z,
+        currentCategory.cameraPlacementJSON.target.x,
+        currentCategory.cameraPlacementJSON.target.y,
+        currentCategory.cameraPlacementJSON.target.z,
+        true
+      );
     } else {
       controls.current.setLookAt(
         MODE_CAMERA_POSITIONS.desktop[mode].start[0],
@@ -97,6 +95,10 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
         true
       );
     }
+
+    // for debug
+    // @ts-ignore
+    window.controls = controls.current;
   }, [currentCategory, mode, initialLoading, loading, isMobile]);
 
   return (

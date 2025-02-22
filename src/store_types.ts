@@ -23,6 +23,10 @@ export interface CategoryExpandedDefaultAsset {
     image: string;
     createdAt: string;
     updatedAt: string;
+    cameraPlacementJSON: {
+        start: { x: number, y: number, z: number };
+        target: { x: number, y: number, z: number };
+    };
     expand: {
         default_asset_id: {
             id: string;
