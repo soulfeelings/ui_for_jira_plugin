@@ -79,74 +79,81 @@ export const Shop: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full">
-            <div className={`pointer-events-auto relativep-[25px] max-w-lg mx-auto flex flex-col bg-[#DFD1C1]/30 ${isMobile ? "min-w-[300px] min-h-[300px] w-[300px] h-[300px]" : "min-w-[500px] min-h-[500px] w-[500px] h-[500px]"} rounded-[50px]`}>
-                {!isMobile && <h1 className="text-2xl font-bold text-center mb-4 color-[#333333] mt-[29px]">{currentCategory?.name}</h1>}
-                <div className="flex flex-col gap-2 translate-x-[-100%] flex-shrink-0 absolute top-[25px] left-0">
-                    {/* button to scroll up */}
-                    <button className="pointer-events-auto" style={{ opacity: hideUpButton ? 0 : 1, pointerEvents: hideUpButton ? "none" : "auto" }} onClick={() => setTranslate((prev) => {
-                        const next = prev - 100;
-                        setHideDownButton(false);
+            <div className={`pointer-events-auto relative p-[25px] max-w-lg mx-auto flex flex-col bg-[#DFD1C1]/30 ${isMobile ? "min-w-[300px] min-h-[300px] w-[300px] h-[300px]" : "min-w-[500px] min-h-[500px] w-[500px] h-[500px]"} rounded-[50px]`}>
+    {!isMobile && <h1 className="text-2xl font-bold text-center mb-4 color-[#333333] mt-[29px]">{currentCategory?.name}</h1>}
+    <div className="flex flex-col gap-2 translate-x-[-100%] flex-shrink-0 absolute top-[25px] left-0">
+        {/* button to scroll up */}
+        <button 
+            className="pointer-events-auto transform transition-transform duration-100 active:scale-110" 
+            style={{ opacity: hideUpButton ? 0 : 1, marginLeft: "25px", pointerEvents: hideUpButton ? "none" : "auto" }} 
+            onClick={() => setTranslate((prev) => {
+                const next = prev - 100;
+                setHideDownButton(false);
 
-                        if (next < -(scrollContainerHeight - 400)) {
-                            setHideUpButton(true);
-                            return -(scrollContainerHeight - 400);
-                        }
-                        return next;
-                    })}>
-                        Up
+                if (next < -(scrollContainerHeight - 400)) {
+                    setHideUpButton(true);
+                    return -(scrollContainerHeight - 400);
+                }
+                return next;
+            })}
+        >
+            <img src="/assets/up-arrow.png" alt="Up" className="w-8 h-8" />
+        </button>
+        <div className="overflow-y-hidden h-[400px]" >
+            <div ref={scrollContainerRef} onWheel={(e) => {
+                // throttle
+                throttleScroll(e);
+            }} className="flex flex-col gap-2 transition-transform duration-300" style={{ transform: `translateY(${translate}px)` }}>
+                {categories.map((category) => (
+                    <button
+                        key={category.id}
+                        onClick={() => setCurrentCategory(category)}
+                        className={`${isMobile ? "" : "h-[60px] min-h-[60px] w-[80px]"} 
+                            p-[15px] rounded 
+                            text-[0.5em]
+                            relative 
+                            ${currentCategory?.id === category.id ? "bg-[#FFBB4E] text-white" : "bg-[#E8E3D9]"} 
+                            [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%,10%_50%)]`}
+                    >
+                        {category.image ? <img src={pb.files.getUrl(category, category.image)} alt={category.name} className="w-full h-full object-contain" /> : category.name}
                     </button>
-                    <div className="overflow-y-hidden h-[400px]" >
-                        <div ref={scrollContainerRef} onWheel={(e) => {
-                            // throttle
-                            throttleScroll(e);
-                        }} className="flex flex-col gap-2 transition-transform duration-300" style={{ transform: `translateY(${translate}px)` }}>
-                            {categories.map((category) => (
-                                <button
-                                    key={category.id}
-                                    onClick={() => setCurrentCategory(category)}
-                                    className={`${isMobile ? "" : "h-[60px] min-h-[60px] w-[80px]"} 
-                                        p-[15px] rounded 
-                                        text-[0.5em]
-                                        relative 
-                                        ${currentCategory?.id === category.id ? "bg-[#FFBB4E] text-white" : "bg-[#E8E3D9]"} 
-                                        [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%,10%_50%)]`}
-                                >
-                                    {category.image ? <img src={pb.files.getUrl(category, category.image)} alt={category.name} className="w-full h-full object-contain" /> : category.name}
-                                </button>
-
-                            ))}
-                        </div>
-                    </div>
-                    {/* button to scroll down */}
-                    <button className="pointer-events-auto" style={{ opacity: hideDownButton ? 0 : 1, pointerEvents: hideDownButton ? "none" : "auto" }} onClick={() => setTranslate((prev) => {
-                        const next = prev + 100;
-                        setHideUpButton(false);
-
-                        if (next > 0) {
-                            setHideDownButton(true);
-                            return 0;
-                        }
-
-                        return next;
-                    })}>
-                        Down
-                    </button>
-                </div>
-
-                <div className="flex flex-wrap gap-[20px] rounded-lg overflow-y-scroll flex-1 p-6">
-                    <NoAssetCard isSelected={!selectedAsset} onClick={() => setSelectedAsset(null)} />
-                    {currentCategoryAssets.map((item) => (
-                        <AssetCard
-                            key={item.id}
-                            asset={item}
-                            isBought={userCharacterCustomization?.customization[currentCategory?.name ?? '']?.asset?.id === selectedAsset?.name}
-                            isSelected={selectedAsset?.id === item.id}
-                            onClick={setSelectedAsset}
-                            isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
-                        />
-                    ))}
-                </div>
+                ))}
             </div>
+        </div>
+        {/* button to scroll down */}
+        <button 
+            className="pointer-events-auto transform transition-transform duration-100 active:scale-110" 
+            style={{ opacity: hideDownButton ? 0 : 1, marginLeft: "25px", pointerEvents: hideDownButton ? "none" : "auto" }} 
+            onClick={() => setTranslate((prev) => {
+                const next = prev + 100;
+                setHideUpButton(false);
+
+                if (next > 0) {
+                    setHideDownButton(true);
+                    return 0;
+                }
+
+                return next;
+            })}
+        >
+            <img src="/assets/down-arrow.png" alt="Down" className="w-8 h-8" />
+        </button>
+    </div>
+
+    <div className="flex flex-wrap gap-[20px] rounded-lg overflow-y-scroll flex-1 p-6">
+        <NoAssetCard isSelected={!selectedAsset} onClick={() => setSelectedAsset(null)} />
+        {currentCategoryAssets.map((item) => (
+            <AssetCard
+                key={item.id}
+                asset={item}
+                isBought={userCharacterCustomization?.customization[currentCategory?.name ?? '']?.asset?.id === selectedAsset?.name}
+                isSelected={selectedAsset?.id === item.id}
+                onClick={setSelectedAsset}
+                isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
+            />
+        ))}
+    </div>
+</div>
             <Space height={23} />
             <button
                 onClick={handleBuy}
