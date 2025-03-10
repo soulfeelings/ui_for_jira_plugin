@@ -12,11 +12,13 @@ interface AssetCardProps {
 export const AssetCard = ({ asset, isSelected, onClick, isDisabled, isBought = true }: AssetCardProps) => {
     return (
         <div
-            className={`${isDisabled && !isBought ? 'opacity-[0.5] pointer-events-none' : ''} cursor-pointer w-[137px] h-[174px] min-w-[137px] min-h-[174px] border p-[16px] rounded-[25px] 
-          ${isSelected ? "border-[#B1ABA0] border-inside border-4" : ""} 
-          ${isBought ? "border-[#10B981] border-inside border-4" : "border-0"} 
-          flex flex-col items-center justify-center gap-2 bg-[#EBE6DD]`}
-            onClick={() => onClick(asset)}
+            className={`${isDisabled && !isBought ? 'opacity-[0.5] pointer-events-none' : ''} 
+                        ${isBought ? 'pointer-events-none' : 'cursor-pointer'} 
+                        w-[137px] h-[174px] min-w-[137px] min-h-[174px] border p-[16px] rounded-[25px] 
+                        ${isSelected ? "border-[#B1ABA0] border-inside border-4" : ""} 
+                        ${isBought ? "border-[#10B981] border-inside border-4" : "border-0"} 
+                        flex flex-col items-center justify-center gap-2 bg-[#EBE6DD]`}
+            onClick={isBought ? undefined : () => onClick(asset)} // Отключаем onClick для надетых предметов
         >
             <img
                 src={pb.files.getUrl(asset, asset.image)}
