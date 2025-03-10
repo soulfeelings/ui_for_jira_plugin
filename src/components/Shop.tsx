@@ -143,15 +143,15 @@ export const Shop: React.FC = () => {
     <div className="flex flex-wrap gap-[20px] rounded-lg overflow-y-scroll flex-1 p-6">
         <NoAssetCard isSelected={!selectedAsset} onClick={() => setSelectedAsset(null)} />
         {currentCategoryAssets.map((item) => (
-            <AssetCard
-                key={item.id}
-                asset={item}
-                isBought={userCharacterCustomization?.customization[currentCategory?.name ?? '']?.asset?.id === selectedAsset?.name}
-                isSelected={selectedAsset?.id === item.id}
-                onClick={setSelectedAsset}
-                isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
-            />
-        ))}
+    <AssetCard
+        key={item.id}
+        asset={item}
+        isBought={userCharacterCustomization?.customization[currentCategory?.name ?? '']?.asset?.id === item.id}
+        isSelected={selectedAsset?.id === item.id}
+        onClick={setSelectedAsset}
+        isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
+    />
+))}
     </div>
 </div>
             <Space height={23} />
