@@ -35,21 +35,79 @@ export const Shop: React.FC = () => {
     const updateUserCharacterCustomization = useConfiguratorStore((state) => state.updateUserCharacterCustomization);
     const cantAffordSelectedItem = useCanAffordSelected()
 
+    const user = useConfiguratorStore(state => state.user);
+    const userAssets = useConfiguratorStore(state => state.userAssets);
+    const userAssetsId = useConfiguratorStore(state => state.userAssetsId);
+    const fetchUserAssets = useConfiguratorStore(state => state.fetchUserAssets);
+
     const currentCategoryAssets = assets.filter((asset) => asset.category_id === currentCategory?.id);
+    const isAlreadyBought = selectedAsset && userAssets.some(a => a.id === selectedAsset.id);
 
-    const handleBuy = () => {
-        if (selectedAsset && userCharacterCustomization) {
-            updateUserCharacterCustomization(userCharacterCustomization.id, {
-                ...(userCharacterCustomization.customization || {}),
-                [currentCategory?.name || '']: {
-                    ...(userCharacterCustomization.customization?.[currentCategory?.name || ''] || {}),
-                    asset: selectedAsset
-                }
-            });
+// Так все ломается, но есть намеки на подсветку зеленым
+//     const handleBuy = async () => {
+//   if (!selectedAsset || !user) return;
+
+//   const isAlreadyBought = userAssets.some(a => a.id === selectedAsset.id);
+
+//   try {
+//     if (isAlreadyBought) {
+//       // Экипировка
+//       await useConfiguratorStore.getState().equipAsset(selectedAsset);
+//     } else {
+//       // Покупка
+//       await pb.collection('user_assets').update(userAssetsId, {
+//         '+assets': selectedAsset.id
+//       });
+//       await fetchUserAssets(user.id);
+//     }
+    
+//     // Обновление кастомизации после действий
+//     if (userCharacterCustomization) {
+//       updateUserCharacterCustomization(
+//         userCharacterCustomization.id, 
+//         {
+//           ...userCharacterCustomization.customization,
+//           [currentCategory?.name || '']: {
+//             ...userCharacterCustomization.customization?.[currentCategory?.name || ''],
+//             asset: selectedAsset.id
+//           }
+//         }
+//       );
+//     }
+//   } catch (error) {
+//     console.error('Operation failed:', error);
+//   }
+// };
+
+// С этим работает отнсоительно нормально:
+const handleBuy = async () => {
+    if (selectedAsset && userCharacterCustomization) {
+      try {
+        // Добавляем ассет в коллекцию user_assets
+        await pb.collection('user_assets').update(userAssetsId, {
+          '+assets': selectedAsset.id
+        });
+        //Обновляем список купленных ассетов
+        await fetchUserAssets(user.id);
+        // Обновляем локальное состояние
+        updateUserCharacterCustomization(userCharacterCustomization.id, {
+          ...userCharacterCustomization.customization,
+          [currentCategory?.name || '']: {
+            ...userCharacterCustomization.customization?.[currentCategory?.name || ''],
+            asset: selectedAsset
+          }
+        });
+      } catch (error) {
+        console.error('Purchase failed:', error);
+      }
+    }
+  };
+
+    useEffect(() => {
+        if (user?.id) {
+          fetchUserAssets(user.id);
         }
-    };
-
-
+      }, [user?.id]);
     useEffect(() => {
         if (!currentCategory) {
             setCurrentCategory(categories[0]);
@@ -143,16 +201,18 @@ export const Shop: React.FC = () => {
     <div className="flex flex-wrap gap-[20px] rounded-lg overflow-y-scroll flex-1 p-6">
         <NoAssetCard isSelected={!selectedAsset} onClick={() => setSelectedAsset(null)} />
         {currentCategoryAssets.map((item) => (
-    <AssetCard
-        key={item.id}
-        asset={item}
-        isBought={userCharacterCustomization?.customization[currentCategory?.name ?? '']?.asset?.id === item.id}
-        isSelected={selectedAsset?.id === item.id}
-        onClick={setSelectedAsset}
-        isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
-    />
-))}
-    </div>
+          <AssetCard
+            key={item.id}
+            asset={item}
+            isBought={userAssets.some(a => a.id === item.id)} // Здесь изменение
+            isSelected={selectedAsset?.id === item.id}
+            onClick={setSelectedAsset}
+            isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
+            isEquipped={userCharacterCustomization?.customization?.[currentCategory?.name || '']?.asset === item.id}
+
+          />
+        ))}
+      </div>
 </div>
             <Space height={23} />
             <button
@@ -160,7 +220,7 @@ export const Shop: React.FC = () => {
                 disabled={!cantAffordSelectedItem}
                 className="disabled:opacity-50 flex-shrink-0 pointer-events-auto bg-[#F2C52E] text-white py-2 px-4 rounded-lg w-full h-[96px] shadow-[inset_-1px_-6px_0px_-1px_rgba(97,97,97,0.34)] rounded-[27px] text-[30px] font-extrabold"
             >
-                Buy
+                {isAlreadyBought ? 'Надеть' : 'Купить'}
             </button>
         </div>
     );
