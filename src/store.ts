@@ -34,6 +34,9 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   lockedGroups: {},
   skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
   cantAffordSelectedItem: false,
+  userAssets: [],
+  userAssetsId: [],
+  equippedAssets: [],
 
   // loading states
   loading: false,
@@ -316,8 +319,42 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     } finally {
       set({ loadingUserCharacterCustomization: false });
     }
-  }
-}))
+  },
+  setUserAssets: (assets) => set({ userAssets: assets }),
+  fetchUserAssets: async (userId) => {
+    const records = await pb.collection('user_assets').getFullList({
+      filter: `user_id = "${userId}"`,
+      expand: 'assets'
+    });
+    set({ 
+      userAssets: records.flatMap(r => r.expand?.assets || []),
+      userAssetsId: records[0].id
+    });
+  },
+
+  // Здесь я пыталась заставить его как то запоминать, что надето. Но полагаю именно здесь и есть ошибка. Так же я пробовала построить функцию equipAsset
+  // по аналогии с fetchuserAssets, но это вообще не работала. Я полагаю, что вероятнее всего ошибка в неправильно расставленных связях (если так можно выразиться
+  equipAsset: async (asset: Asset) => {
+    const { userCharacterCustomization, currentCategory, user_character_id } = get();
+    const updatedCustomization = {
+      ...userCharacterCustomization.customization,
+      [currentCategory.name]: {
+        ...userCharacterCustomization.customization[currentCategory.name],
+        asset: asset.id
+      }
+    };
+  
+    await pb.collection('character_customization_json').update(userCharacterCustomization.id, {
+      customization: JSON.stringify(updatedCustomization)
+    });
+  
+    set({
+      userCharacterCustomization: {
+        ...userCharacterCustomization,
+        customization: updatedCustomization
+      }
+    });
+  },}))
 
 console.log(useConfiguratorStore.getState())
 useConfiguratorStore.getState().fetchInitialData()
@@ -338,6 +375,7 @@ window.addEventListener('resize', checkIsMobileDebounced)
 
 
 export interface ConfiguratorStore {
+  fetchUserAssets: any;
   // initial data
   initialDataLoaded: boolean;
   character: Character | null;
@@ -388,6 +426,7 @@ export interface ConfiguratorStore {
   createCharacter: (name: string) => Promise<void>;
   updateCharacter: (character: Character) => Promise<void>;
   saveName: (name: string) => Promise<void>;
+  equipAsset: (asset: Asset) => Promise<void>;
 
   // setters
   setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;
