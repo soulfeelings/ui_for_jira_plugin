@@ -43,41 +43,6 @@ export const Shop: React.FC = () => {
     const currentCategoryAssets = assets.filter((asset) => asset.category_id === currentCategory?.id);
     const isAlreadyBought = selectedAsset && userAssets.some(a => a.id === selectedAsset.id);
 
-// Так все ломается, но есть намеки на подсветку зеленым
-//     const handleBuy = async () => {
-//   if (!selectedAsset || !user) return;
-
-//   const isAlreadyBought = userAssets.some(a => a.id === selectedAsset.id);
-
-//   try {
-//     if (isAlreadyBought) {
-//       // Экипировка
-//       await useConfiguratorStore.getState().equipAsset(selectedAsset);
-//     } else {
-//       // Покупка
-//       await pb.collection('user_assets').update(userAssetsId, {
-//         '+assets': selectedAsset.id
-//       });
-//       await fetchUserAssets(user.id);
-//     }
-    
-//     // Обновление кастомизации после действий
-//     if (userCharacterCustomization) {
-//       updateUserCharacterCustomization(
-//         userCharacterCustomization.id, 
-//         {
-//           ...userCharacterCustomization.customization,
-//           [currentCategory?.name || '']: {
-//             ...userCharacterCustomization.customization?.[currentCategory?.name || ''],
-//             asset: selectedAsset.id
-//           }
-//         }
-//       );
-//     }
-//   } catch (error) {
-//     console.error('Operation failed:', error);
-//   }
-// };
 
 // С этим работает отнсоительно нормально:
 const handleBuy = async () => {
@@ -102,7 +67,6 @@ const handleBuy = async () => {
       }
     }
   };
-
     useEffect(() => {
         if (user?.id) {
           fetchUserAssets(user.id);
@@ -200,18 +164,21 @@ const handleBuy = async () => {
 
     <div className="flex flex-wrap gap-[20px] rounded-lg overflow-y-scroll flex-1 p-6">
         <NoAssetCard isSelected={!selectedAsset} onClick={() => setSelectedAsset(null)} />
-        {currentCategoryAssets.map((item) => (
-          <AssetCard
+        {currentCategoryAssets.map((item) => {
+    const isEquipped = userCharacterCustomization?.customization?.[currentCategory?.name || '']?.asset?.id === item.id;
+    
+    return (
+        <AssetCard
             key={item.id}
             asset={item}
-            isBought={userAssets.some(a => a.id === item.id)} // Здесь изменение
+            isBought={userAssets.some(a => a.id === item.id)}
             isSelected={selectedAsset?.id === item.id}
+            isEquipped={isEquipped} // Передаем статус экипировки
             onClick={setSelectedAsset}
             isDisabled={Boolean(userXpPoints && userXpPoints < item.price)}
-            isEquipped={userCharacterCustomization?.customization?.[currentCategory?.name || '']?.asset === item.id}
-
-          />
-        ))}
+        />
+    );
+})}
       </div>
 </div>
             <Space height={23} />

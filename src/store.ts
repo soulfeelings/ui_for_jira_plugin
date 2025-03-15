@@ -321,7 +321,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     }
   },
   setUserAssets: (assets) => set({ userAssets: assets }),
-  fetchUserAssets: async (userId) => {
+  fetchUserAssets: async (userId: any) => {
     const records = await pb.collection('user_assets').getFullList({
       filter: `user_id = "${userId}"`,
       expand: 'assets'
@@ -332,29 +332,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     });
   },
 
-  // Здесь я пыталась заставить его как то запоминать, что надето. Но полагаю именно здесь и есть ошибка. Так же я пробовала построить функцию equipAsset
-  // по аналогии с fetchuserAssets, но это вообще не работала. Я полагаю, что вероятнее всего ошибка в неправильно расставленных связях (если так можно выразиться
-  equipAsset: async (asset: Asset) => {
-    const { userCharacterCustomization, currentCategory, user_character_id } = get();
-    const updatedCustomization = {
-      ...userCharacterCustomization.customization,
-      [currentCategory.name]: {
-        ...userCharacterCustomization.customization[currentCategory.name],
-        asset: asset.id
-      }
-    };
-  
-    await pb.collection('character_customization_json').update(userCharacterCustomization.id, {
-      customization: JSON.stringify(updatedCustomization)
-    });
-  
-    set({
-      userCharacterCustomization: {
-        ...userCharacterCustomization,
-        customization: updatedCustomization
-      }
-    });
-  },}))
+}))
 
 console.log(useConfiguratorStore.getState())
 useConfiguratorStore.getState().fetchInitialData()
@@ -395,6 +373,10 @@ export interface ConfiguratorStore {
   skin: MeshStandardMaterial;
   mode: typeof UI_MODES[keyof typeof UI_MODES];
   cantAffordSelectedItem: boolean;
+  userAssets: Asset[];
+  userAssetsId: string;
+  userId: string;
+  
 
   // loading states
   loading: boolean;
@@ -428,6 +410,7 @@ export interface ConfiguratorStore {
   saveName: (name: string) => Promise<void>;
   equipAsset: (asset: Asset) => Promise<void>;
 
+
   // setters
   setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;
   setUserCharacterCustomization: (customization: UserCharacterCustomization) => void;
@@ -435,4 +418,5 @@ export interface ConfiguratorStore {
   setAssets: (assets: Asset[]) => void;
   setSelectedAsset: (asset: Asset | null) => void;
   setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => void;
+  setUserAssets: (assets: Asset[]) => void;
 }
