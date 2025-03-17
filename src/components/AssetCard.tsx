@@ -15,7 +15,7 @@ export const AssetCard = ({
   isSelected,
   onClick,
   isDisabled,
-  isBought = true,
+  isBought,
   isEquipped,
 }: AssetCardProps) => {
   return (
@@ -25,7 +25,7 @@ export const AssetCard = ({
             w-[137px] h-[174px] min-w-[137px] min-h-[174px] border p-[16px] rounded-[25px] 
             ${isSelected ? 'border-4 border-[#B1ABA0]' : ''} // Приоритет для выбранного
             ${!isBought && !isSelected ? 'border-4 border-[#FFBB4E]' : ''} 
-            ${isEquipped ? 'border-4 border-[#4CAF50]' : ''}
+            ${isEquipped ? 'border-4 border-[#4CAF50] pointer-events-none' : ''}
             flex flex-col items-center justify-center gap-2 bg-[#EBE6DD]`}
       onClick={() => onClick(asset)}
     >

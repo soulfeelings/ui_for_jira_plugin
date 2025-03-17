@@ -56,7 +56,7 @@ export const Shop: React.FC = () => {
           '+assets': selectedAsset.id,
         });
         //Обновляем список купленных ассетов
-        await fetchUserAssets(user.id);
+        await fetchUserAssets(user?.id);
         // Обновляем локальное состояние
         updateUserCharacterCustomization(userCharacterCustomization.id, {
           ...userCharacterCustomization.customization,
