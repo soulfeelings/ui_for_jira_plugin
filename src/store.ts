@@ -48,7 +48,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
   cantAffordSelectedItem: false,
   userAssets: [],
-  userAssetsId: [],
+  userAssetsId: '',
   equippedAssets: [],
 
   // loading states
@@ -327,16 +327,17 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     try {
       const userXp = get().user_xp;
       const selectedAsset = get().selectedAsset;
-      if (!userXp || !selectedAsset) {
+
+      if (!userXp || selectedAsset === undefined) {
         throw new Error('User XP or selected asset not found');
       }
-      if (userXp.xp < selectedAsset.price) {
+      if (userXp.xp < (selectedAsset?.price ?? 0)) {
         set({ cantAffordSelectedItem: true });
         alert('User cant afford this item');
         return;
       }
 
-      const restUserXp = userXp.xp - selectedAsset.price;
+      const restUserXp = userXp.xp - (selectedAsset?.price ?? 0);
       if (restUserXp !== 0) {
         await get().updateUserXp(restUserXp);
       }
@@ -424,7 +425,6 @@ export interface ConfiguratorStore {
   cantAffordSelectedItem: boolean;
   userAssets: Asset[];
   userAssetsId: string;
-  userId: string;
 
   // loading states
   loading: boolean;
@@ -461,7 +461,6 @@ export interface ConfiguratorStore {
   createCharacter: (name: string) => Promise<void>;
   updateCharacter: (character: Character) => Promise<void>;
   saveName: (name: string) => Promise<void>;
-  equipAsset: (asset: Asset) => Promise<void>;
 
   // setters
   setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;

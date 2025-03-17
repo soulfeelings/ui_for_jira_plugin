@@ -46,6 +46,7 @@ export const Shop: React.FC = () => {
 
   const currentCategoryAssets = assets.filter(asset => asset.category_id === currentCategory?.id);
   const isAlreadyBought = selectedAsset && userAssets.some(a => a.id === selectedAsset.id);
+  const isTakeOffSelected = selectedAsset === null;
 
   // С этим работает отнсоительно нормально:
   const handleBuy = async () => {
@@ -70,6 +71,23 @@ export const Shop: React.FC = () => {
       }
     }
   };
+
+  const handleTakeOff = async () => {
+    if (!userCharacterCustomization || !currentCategory) {
+      return;
+    }
+    const copy = { ...userCharacterCustomization.customization };
+    // Проверяем, существует ли свойство 'asset' перед удалением
+    const currentAsset = copy[currentCategory.name]?.asset;
+    if (currentAsset) {
+      const categoryData = { ...copy[currentCategory.name] };
+      delete categoryData.asset;
+
+      copy[currentCategory.name] = categoryData;
+      updateUserCharacterCustomization(userCharacterCustomization.id, copy);
+    }
+  };
+
   useEffect(() => {
     if (user?.id) {
       fetchUserAssets(user.id);
@@ -200,7 +218,11 @@ export const Shop: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap gap-[20px] rounded-lg overflow-y-scroll flex-1 p-6">
-          <NoAssetCard isSelected={!selectedAsset} onClick={() => setSelectedAsset(null)} />
+          <NoAssetCard
+            isSelected={!selectedAsset}
+            isEquipped={selectedAsset === null}
+            onClick={() => setSelectedAsset(null)}
+          />
           {currentCategoryAssets.map(item => {
             const isEquipped =
               userCharacterCustomization?.customization?.[currentCategory?.name || '']?.asset
@@ -222,11 +244,11 @@ export const Shop: React.FC = () => {
       </div>
       <Space height={23} />
       <button
-        onClick={handleBuy}
+        onClick={isTakeOffSelected ? handleTakeOff : handleBuy}
         disabled={!cantAffordSelectedItem}
         className="disabled:opacity-50 flex-shrink-0 pointer-events-auto bg-[#F2C52E] text-white py-2 px-4 rounded-lg w-full h-[96px] shadow-[inset_-1px_-6px_0px_-1px_rgba(97,97,97,0.34)] rounded-[27px] text-[30px] font-extrabold"
       >
-        {isAlreadyBought ? 'Надеть' : 'Купить'}
+        {isAlreadyBought ? 'Надеть' : isTakeOffSelected ? 'Снять' : 'Купить'}
       </button>
     </div>
   );
