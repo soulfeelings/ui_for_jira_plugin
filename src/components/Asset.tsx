@@ -1,12 +1,12 @@
-import { useGLTF } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
-import { useConfiguratorStore } from "../store";
-import * as THREE from "three";
+import { useGLTF } from '@react-three/drei';
+import { useEffect, useMemo } from 'react';
+import { useConfiguratorStore } from '../store';
+import * as THREE from 'three';
 
 export const Asset = ({
   url,
   categoryName,
-  skeleton
+  skeleton,
 }: {
   url: string;
   categoryName: string;
@@ -15,19 +15,21 @@ export const Asset = ({
   const gltf = useGLTF(url);
   const scene = gltf.scene;
 
-  const userCharacterCustomization = useConfiguratorStore((state) => state.userCharacterCustomization);
-  const lockedGroups = useConfiguratorStore((state) => state.lockedGroups);
+  const userCharacterCustomization = useConfiguratorStore(
+    state => state.userCharacterCustomization
+  );
+  const lockedGroups = useConfiguratorStore(state => state.lockedGroups);
 
   const assetColor = userCharacterCustomization?.customization[categoryName].color;
 
-  const skin = useConfiguratorStore((state) => state.skin);
+  const skin = useConfiguratorStore(state => state.skin);
 
   useEffect(() => {
-    scene.traverse((child) => {
+    scene.traverse(child => {
       // @ts-ignore
       if (child.isMesh) {
         // @ts-ignore
-        if (child.material && 'name' in child.material && child.material.name.includes("Color_")) {
+        if (child.material && 'name' in child.material && child.material.name.includes('Color_')) {
           // @ts-ignore
           child.material.color.set(assetColor);
         }
@@ -43,7 +45,7 @@ export const Asset = ({
       morphTargetInfluences: number[];
     }[] = [];
 
-    scene.traverse((child) => {
+    scene.traverse(child => {
       // @ts-ignore
       if (child.isMesh) {
         // @ts-ignore
@@ -51,10 +53,10 @@ export const Asset = ({
           // @ts-ignore
           geometry: child.geometry,
           // @ts-ignore
-          material: child.material.name.includes("Skin_")
+          material: child.material.name.includes('Skin_')
             ? skin
-            // @ts-ignore
-            : child.material,
+            : // @ts-ignore
+              child.material,
           // @ts-ignore
           morphTargetDictionary: child.morphTargetDictionary,
           // @ts-ignore

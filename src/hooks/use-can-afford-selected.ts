@@ -1,19 +1,19 @@
-import { useConfiguratorStore } from "@/store";
-import { useMemo } from "react";
+import { useConfiguratorStore } from '@/store';
+import { useMemo } from 'react';
 
 export const useCanAffordSelected = () => {
-    const userXp = useConfiguratorStore((state) => state.user_xp);
-    const selectedAsset = useConfiguratorStore((state) => state.selectedAsset);
+  const userXp = useConfiguratorStore(state => state.user_xp);
+  const selectedAsset = useConfiguratorStore(state => state.selectedAsset);
 
-    return useMemo(() => {
-        if (!selectedAsset) {
-            return true;
-        }
+  return useMemo(() => {
+    if (!selectedAsset) {
+      return true;
+    }
 
-        if (!userXp) {
-            return false;
-        }
+    if (!userXp) {
+      return false;
+    }
 
-        return userXp.xp > selectedAsset.price;
-    }, [userXp, selectedAsset]);
-}
+    return userXp.xp > selectedAsset.price;
+  }, [userXp, selectedAsset]);
+};
