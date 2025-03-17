@@ -1,0 +1,21 @@
+# Игнорировать build и dist
+dist
+build
+
+# Игнорировать зависимости
+node_modules
+
+# Игнорировать файлы сборки
+.cache
+coverage
+
+# Игнорировать логи
+*.log
+
+# Игнорировать другие файлы
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local 

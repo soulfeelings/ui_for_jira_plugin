@@ -1,18 +1,31 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { MeshStandardMaterial } from "three";
-import PocketBase from "pocketbase";
-import { User, Character, UserCharacterExpandedCharacter, Level, UserLevel, UserXp } from "./apiTypes";
-import { PHOTO_POSES, UI_MODES, Asset, CategoryExpandedDefaultAsset, Customization, LockedGroups, UserCharacterCustomization } from "./store_types";
-
+import { MeshStandardMaterial } from 'three';
+import PocketBase from 'pocketbase';
+import {
+  User,
+  Character,
+  UserCharacterExpandedCharacter,
+  Level,
+  UserLevel,
+  UserXp,
+} from './apiTypes';
+import {
+  PHOTO_POSES,
+  UI_MODES,
+  Asset,
+  CategoryExpandedDefaultAsset,
+  Customization,
+  LockedGroups,
+  UserCharacterCustomization,
+} from './store_types';
 
 const pocketBaseUrl = import.meta.env?.VITE_POCKETBASE_URL;
 if (!pocketBaseUrl) {
-  throw new Error("VITE_POCKETBASE_URL is required");
+  throw new Error('VITE_POCKETBASE_URL is required');
 }
 
 export const pb = new PocketBase(pocketBaseUrl);
-
 
 export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   // initial data
@@ -35,7 +48,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   skin: new MeshStandardMaterial({ color: 0xf5c6a5, roughness: 1 }),
   cantAffordSelectedItem: false,
   userAssets: [],
-  userAssetsId: [],
+  userAssetsId: '',
   equippedAssets: [],
 
   // loading states
@@ -52,8 +65,10 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   loadingCreateCharacter: false,
 
   // setters
-  setCurrentCategory: (category: CategoryExpandedDefaultAsset) => set({ currentCategory: category }),
-  setUserCharacterCustomization: (customization: UserCharacterCustomization) => set({ userCharacterCustomization: customization }),
+  setCurrentCategory: (category: CategoryExpandedDefaultAsset) =>
+    set({ currentCategory: category }),
+  setUserCharacterCustomization: (customization: UserCharacterCustomization) =>
+    set({ userCharacterCustomization: customization }),
   setUserLevel: (level: UserLevel) => set({ user_level: level }),
   setUserXp: (xp: UserXp) => set({ user_xp: xp }),
   setLevels: (levels: Level[]) => set({ levels }),
@@ -67,26 +82,26 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     set({ loadingLevels: true });
     try {
       const levels = await pb.collection('user_levels').getFullList<Level>({
-        sort: 'level'
+        sort: 'level',
       });
       set({ levels });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingLevels: false });
     }
   },
   fetchInitialData: async () => {
     set({
-      initialDataLoaded: false
-    })
+      initialDataLoaded: false,
+    });
     try {
       // await new Promise(resolve => setTimeout(resolve, 2000));
-      const user = await get().fetchUser()
+      const user = await get().fetchUser();
       console.log('user', user);
       if (user) {
-        await get().fetchUserCharacter(user.id)
-        const userCharacterId = get().user_character_id
+        await get().fetchUserCharacter(user.id);
+        const userCharacterId = get().user_character_id;
         if (userCharacterId) {
           console.log('userCharacterId', userCharacterId);
 
@@ -96,38 +111,45 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
             get().fetchAssets(),
             get().fetchLevels(),
             get().fetchUserLevel(),
-            get().fetchUserXp()
+            get().fetchUserXp(),
           ]);
 
-          const userCharacterCustomization = get().userCharacterCustomization
+          const userCharacterCustomization = get().userCharacterCustomization;
           if (!userCharacterCustomization && userCharacterId) {
             const categories = get().categories;
-            await get().createUserCharacterCustomization(userCharacterId, categories.reduce((acc, category) => ({
-              ...acc,
-              [category.name]: {
-                asset: category.expand.default_asset_id,
-                color: '#000000'
-              }
-            }), {}))
-
+            await get().createUserCharacterCustomization(
+              userCharacterId,
+              categories.reduce(
+                (acc, category) => ({
+                  ...acc,
+                  [category.name]: {
+                    asset: category.expand.default_asset_id,
+                    color: '#000000',
+                  },
+                }),
+                {}
+              )
+            );
           }
         }
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({
-        initialDataLoaded: true
-      })
+        initialDataLoaded: true,
+      });
     }
   },
   fetchUserLevel: async () => {
     set({ loadingUserLevel: true });
     try {
-      const userLevel = await pb.collection('user_level').getFirstListItem<UserLevel>(`user_id="${get().user?.id}"`);
+      const userLevel = await pb
+        .collection('user_level')
+        .getFirstListItem<UserLevel>(`user_id="${get().user?.id}"`);
       set({ user_level: userLevel });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUserLevel: false });
     }
@@ -135,10 +157,12 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   fetchUserXp: async () => {
     set({ loadingUserXp: true });
     try {
-      const userXp = await pb.collection('user_xp').getFirstListItem<UserXp>(`user_id="${get().user?.id}"`);
+      const userXp = await pb
+        .collection('user_xp')
+        .getFirstListItem<UserXp>(`user_id="${get().user?.id}"`);
       set({ user_xp: userXp });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUserXp: false });
     }
@@ -153,7 +177,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
       const userXp = await pb.collection('user_xp').update<UserXp>(userXpId, { xp: newXp });
       set({ user_xp: userXp });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUserXp: false });
     }
@@ -164,30 +188,34 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     try {
       const records = await pb.collection('category').getFullList<CategoryExpandedDefaultAsset>({
         sort: '-created',
-        expand: 'default_asset_id'
+        expand: 'default_asset_id',
       });
 
       set({ categories: records });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingCategories: false });
     }
   },
   fetchUserCharacter: async (user_id: string) => {
-    const userCharacter = await pb.collection("user_character").getFirstListItem<UserCharacterExpandedCharacter>(`user_id="${user_id}"`, {
-      expand: 'character_id'
-    });
+    const userCharacter = await pb
+      .collection('user_character')
+      .getFirstListItem<UserCharacterExpandedCharacter>(`user_id="${user_id}"`, {
+        expand: 'character_id',
+      });
 
     set({ character: userCharacter.expand.character_id, user_character_id: userCharacter.id });
   },
 
   updateCharacter: async (character: Character) => {
-    const newCharacter = await pb.collection('characters').update<Character>(character.id, character);
-    set({ character: newCharacter })
+    const newCharacter = await pb
+      .collection('characters')
+      .update<Character>(character.id, character);
+    set({ character: newCharacter });
   },
 
-  setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => {
+  setMode: (mode: (typeof UI_MODES)[keyof typeof UI_MODES]) => {
     set({ mode });
     if (mode === UI_MODES.CUSTOMIZE) {
       set({ pose: PHOTO_POSES.Idle });
@@ -200,27 +228,29 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     set({ loadingUser: true });
     let user: User | undefined;
     try {
-      const respone = await pb.collection("users").authWithPassword<User>('test@test.com', 'testtest');
+      const respone = await pb
+        .collection('users')
+        .authWithPassword<User>('test@test.com', 'testtest');
       user = respone.record;
       console.log('user', user);
       set({ user });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUser: false });
     }
 
     return user;
   },
-  saveName: async (name) => {
+  saveName: async name => {
     set({ loadingName: true });
     const data = {
       name,
-    }
+    };
     try {
       await pb.collection('characters').create(data);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingName: false });
     }
@@ -234,13 +264,18 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
         throw new Error('User not found or not loaded');
       }
       const hardCodedCharacter = await pb.collection('characters').getOne('z5s1a3a7508ec28');
-      const character = await pb.collection('user_character').create<UserCharacterExpandedCharacter>({
-        user_id: user.id,
-        character_id: hardCodedCharacter.id,
-        name,
-      }, {
-        expand: 'character_id'
-      });
+      const character = await pb
+        .collection('user_character')
+        .create<UserCharacterExpandedCharacter>(
+          {
+            user_id: user.id,
+            character_id: hardCodedCharacter.id,
+            name,
+          },
+          {
+            expand: 'character_id',
+          }
+        );
 
       set({ character: character.expand.character_id });
       await pb.collection('user_level').create({
@@ -252,7 +287,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
         xp: 0,
       });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingCreateCharacter: false });
     }
@@ -266,7 +301,7 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
 
       set({ assets });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingAssets: false });
     }
@@ -274,90 +309,85 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   fetchUserCharacterCustomization: async (user_character_id: string) => {
     set({ loadingUserCharacterCustomization: true });
     try {
-      const customization = await pb.collection('character_customization_json').getFirstListItem<UserCharacterCustomization>(`user_character_id="${user_character_id}"`);
+      const customization = await pb
+        .collection('character_customization_json')
+        .getFirstListItem<UserCharacterCustomization>(`user_character_id="${user_character_id}"`);
       set({ userCharacterCustomization: customization });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUserCharacterCustomization: false });
     }
   },
-  updateUserCharacterCustomization: async (user_character_id: string, customization: Customization) => {
+  updateUserCharacterCustomization: async (
+    user_character_id: string,
+    customization: Customization
+  ) => {
     set({ loadingUserCharacterCustomization: true });
     try {
       const userXp = get().user_xp;
       const selectedAsset = get().selectedAsset;
-      if (!userXp || !selectedAsset) {
+
+      if (!userXp || selectedAsset === undefined) {
         throw new Error('User XP or selected asset not found');
       }
-      if (userXp.xp < selectedAsset.price) {
+      if (userXp.xp < (selectedAsset?.price ?? 0)) {
         set({ cantAffordSelectedItem: true });
         alert('User cant afford this item');
         return;
       }
 
-      const restUserXp = userXp.xp - selectedAsset.price;
+      const restUserXp = userXp.xp - (selectedAsset?.price ?? 0);
       if (restUserXp !== 0) {
         await get().updateUserXp(restUserXp);
       }
 
-      const updated = await pb.collection('character_customization_json').update<UserCharacterCustomization>(user_character_id, { customization: JSON.stringify(customization) });
+      const updated = await pb
+        .collection('character_customization_json')
+        .update<UserCharacterCustomization>(user_character_id, {
+          customization: JSON.stringify(customization),
+        });
       set({ userCharacterCustomization: { ...updated } });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUserCharacterCustomization: false });
     }
   },
-  createUserCharacterCustomization: async (user_character_id: string, customization: Customization) => {
+  createUserCharacterCustomization: async (
+    user_character_id: string,
+    customization: Customization
+  ) => {
     set({ loadingUserCharacterCustomization: true });
     try {
-      const created = await pb.collection('character_customization_json').create<UserCharacterCustomization>({ user_character_id, customization: JSON.stringify(customization) });
+      const created = await pb
+        .collection('character_customization_json')
+        .create<UserCharacterCustomization>({
+          user_character_id,
+          customization: JSON.stringify(customization),
+        });
       set({ userCharacterCustomization: { ...created } });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       set({ loadingUserCharacterCustomization: false });
     }
   },
-  setUserAssets: (assets) => set({ userAssets: assets }),
-  fetchUserAssets: async (userId) => {
+  setUserAssets: assets => set({ userAssets: assets }),
+  fetchUserAssets: async (userId: any) => {
     const records = await pb.collection('user_assets').getFullList({
       filter: `user_id = "${userId}"`,
-      expand: 'assets'
+      expand: 'assets',
     });
-    set({ 
+    set({
       userAssets: records.flatMap(r => r.expand?.assets || []),
-      userAssetsId: records[0].id
+      userAssetsId: records[0].id,
     });
   },
+}));
 
-  // Здесь я пыталась заставить его как то запоминать, что надето. Но полагаю именно здесь и есть ошибка. Так же я пробовала построить функцию equipAsset
-  // по аналогии с fetchuserAssets, но это вообще не работала. Я полагаю, что вероятнее всего ошибка в неправильно расставленных связях (если так можно выразиться
-  equipAsset: async (asset: Asset) => {
-    const { userCharacterCustomization, currentCategory, user_character_id } = get();
-    const updatedCustomization = {
-      ...userCharacterCustomization.customization,
-      [currentCategory.name]: {
-        ...userCharacterCustomization.customization[currentCategory.name],
-        asset: asset.id
-      }
-    };
-  
-    await pb.collection('character_customization_json').update(userCharacterCustomization.id, {
-      customization: JSON.stringify(updatedCustomization)
-    });
-  
-    set({
-      userCharacterCustomization: {
-        ...userCharacterCustomization,
-        customization: updatedCustomization
-      }
-    });
-  },}))
-
-console.log(useConfiguratorStore.getState())
-useConfiguratorStore.getState().fetchInitialData()
+console.log(useConfiguratorStore.getState());
+useConfiguratorStore.getState().fetchInitialData();
 
 const debounce = (func: () => void, delay: number) => {
   let timeout: number;
@@ -365,14 +395,12 @@ const debounce = (func: () => void, delay: number) => {
     clearTimeout(timeout);
     timeout = setTimeout(func, delay);
   };
-}
+};
 const checkIsMobileDebounced = debounce(() => {
-  useConfiguratorStore.getState().setIsMobile(window.innerWidth < 768)
-}, 100)
+  useConfiguratorStore.getState().setIsMobile(window.innerWidth < 768);
+}, 100);
 
-window.addEventListener('resize', checkIsMobileDebounced)
-
-
+window.addEventListener('resize', checkIsMobileDebounced);
 
 export interface ConfiguratorStore {
   fetchUserAssets: any;
@@ -389,12 +417,14 @@ export interface ConfiguratorStore {
   assets: Asset[];
   selectedAsset: Asset | null;
   userCharacterCustomization: UserCharacterCustomization | null;
-  pose: typeof PHOTO_POSES[keyof typeof PHOTO_POSES];
+  pose: (typeof PHOTO_POSES)[keyof typeof PHOTO_POSES];
   currentCategory: CategoryExpandedDefaultAsset | null;
   lockedGroups: LockedGroups;
   skin: MeshStandardMaterial;
-  mode: typeof UI_MODES[keyof typeof UI_MODES];
+  mode: (typeof UI_MODES)[keyof typeof UI_MODES];
   cantAffordSelectedItem: boolean;
+  userAssets: Asset[];
+  userAssetsId: string;
 
   // loading states
   loading: boolean;
@@ -409,7 +439,6 @@ export interface ConfiguratorStore {
   loadingName: boolean;
   loadingCreateCharacter: boolean;
 
-
   // controller methods
   fetchInitialData: () => Promise<void>;
   fetchCategories: () => Promise<void>;
@@ -419,14 +448,19 @@ export interface ConfiguratorStore {
   fetchUserXp: () => Promise<void>;
   updateUserXp: (newXp: number) => Promise<void>;
   fetchUserCharacterCustomization: (user_character_id: string) => Promise<void>;
-  updateUserCharacterCustomization: (user_character_id: string, customization: Customization) => Promise<void>;
-  createUserCharacterCustomization: (user_character_id: string, customization: Customization) => Promise<void>;
+  updateUserCharacterCustomization: (
+    user_character_id: string,
+    customization: Customization
+  ) => Promise<void>;
+  createUserCharacterCustomization: (
+    user_character_id: string,
+    customization: Customization
+  ) => Promise<void>;
   fetchUser: () => Promise<User | undefined>;
   fetchUserCharacter: (user_id: string) => Promise<void>;
   createCharacter: (name: string) => Promise<void>;
   updateCharacter: (character: Character) => Promise<void>;
   saveName: (name: string) => Promise<void>;
-  equipAsset: (asset: Asset) => Promise<void>;
 
   // setters
   setCurrentCategory: (category: CategoryExpandedDefaultAsset) => void;
@@ -434,5 +468,6 @@ export interface ConfiguratorStore {
   setIsMobile: (isMobile: boolean) => void;
   setAssets: (assets: Asset[]) => void;
   setSelectedAsset: (asset: Asset | null) => void;
-  setMode: (mode: typeof UI_MODES[keyof typeof UI_MODES]) => void;
+  setMode: (mode: (typeof UI_MODES)[keyof typeof UI_MODES]) => void;
+  setUserAssets: (assets: Asset[]) => void;
 }

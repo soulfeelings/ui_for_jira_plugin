@@ -1,18 +1,20 @@
-import { NodeIO } from "@gltf-transform/core";
-import { dedup, draco, prune, quantize } from "@gltf-transform/functions";
-import { useAnimations, useGLTF } from "@react-three/drei";
-import { Suspense, useEffect, useRef } from "react";
-import { GLTFExporter } from "three-stdlib";
-import { pb, useConfiguratorStore } from "../store";
-import { Asset } from "./Asset";
-import { Group } from "three";
-import { Object3DEventMap } from "three";
+import { NodeIO } from '@gltf-transform/core';
+import { dedup, draco, prune, quantize } from '@gltf-transform/functions';
+import { useAnimations, useGLTF } from '@react-three/drei';
+import { Suspense, useEffect, useRef } from 'react';
+import { GLTFExporter } from 'three-stdlib';
+import { pb, useConfiguratorStore } from '../store';
+import { Asset } from './Asset';
+import { Group } from 'three';
+import { Object3DEventMap } from 'three';
 
 export const Avatar = ({ ...props }) => {
   const group = useRef<Group<Object3DEventMap>>(null);
-  const { nodes } = useGLTF("/models/Armature.glb");
+  const { nodes } = useGLTF('/models/Armature.glb');
   // const { animations } = useGLTF("/models/Poses.glb");
-  const userCharacterCustomization = useConfiguratorStore((state) => state.userCharacterCustomization);
+  const userCharacterCustomization = useConfiguratorStore(
+    state => state.userCharacterCustomization
+  );
   // const { actions } = useAnimations(animations, group);
   // const setDownload = useConfiguratorStore((state) => state.setDownload);
 
@@ -84,22 +86,23 @@ export const Avatar = ({ ...props }) => {
       <group name="Scene">
         <group name="Armature" rotation={[Math.PI / 2, 0, 0]} scale={0.01}>
           <primitive object={nodes.mixamorigHips} />
-          {userCharacterCustomization?.customization && Object.keys(userCharacterCustomization.customization).map(
-            (key) =>
-              userCharacterCustomization.customization[key]?.asset?.file && (
-                <Suspense key={userCharacterCustomization.customization[key].asset.id}>
-                  <Asset
-                    categoryName={key}
-                    url={pb.files.getUrl(
-                      userCharacterCustomization.customization[key].asset,
-                      userCharacterCustomization.customization[key].asset.file
-                    )}
-                    // @ts-ignore
-                    skeleton={nodes.Plane.skeleton}
-                  />
-                </Suspense>
-              )
-          )}
+          {userCharacterCustomization?.customization &&
+            Object.keys(userCharacterCustomization.customization).map(
+              key =>
+                userCharacterCustomization.customization[key]?.asset?.file && (
+                  <Suspense key={userCharacterCustomization.customization[key].asset.id}>
+                    <Asset
+                      categoryName={key}
+                      url={pb.files.getUrl(
+                        userCharacterCustomization.customization[key].asset,
+                        userCharacterCustomization.customization[key].asset.file
+                      )}
+                      // @ts-ignore
+                      skeleton={nodes.Plane.skeleton}
+                    />
+                  </Suspense>
+                )
+            )}
         </group>
       </group>
     </group>

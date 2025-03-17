@@ -1,23 +1,23 @@
-import { Canvas, Vector3 } from "@react-three/fiber";
-import { Bloom, EffectComposer } from "@react-three/postprocessing";
-import { Leva } from "leva";
-import { DEFAULT_CAMERA_POSITION } from "./components/CameraManager";
-import { Experience } from "./components/Experience.jsx";
-import { UI } from "./components/UI.jsx";
-import { useConfiguratorStore } from "./store";
-import { CharacterNameForm } from "./components/CharacterNameForm.jsx";
-import { ScreenLoader } from "./components/ScreenLoader.jsx";
-import * as THREE from "three";
+import { Canvas, Vector3 } from '@react-three/fiber';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
+import { Leva } from 'leva';
+import { DEFAULT_CAMERA_POSITION } from './components/CameraManager';
+import { Experience } from './components/Experience.jsx';
+import { UI } from './components/UI.jsx';
+import { useConfiguratorStore } from './store';
+import { CharacterNameForm } from './components/CharacterNameForm.jsx';
+import { ScreenLoader } from './components/ScreenLoader.jsx';
+import * as THREE from 'three';
 
 function App() {
   const initialDataLoaded = useConfiguratorStore(state => state.initialDataLoaded);
   const character = useConfiguratorStore(state => state.character);
   if (!initialDataLoaded) {
-    return <ScreenLoader />
+    return <ScreenLoader />;
   }
 
   if (!character?.name) {
-    return <CharacterNameForm />
+    return <CharacterNameForm />;
   }
 
   return (
@@ -47,6 +47,5 @@ function App() {
     </>
   );
 }
-
 
 export default App;

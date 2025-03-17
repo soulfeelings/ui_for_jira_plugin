@@ -1,36 +1,36 @@
-import { CameraControls, FlyControls, OrbitControls } from "@react-three/drei";
-import { useEffect, useRef } from "react";
-import { useConfiguratorStore } from "../store.ts";
-import { UI_MODES } from "../store_types.ts";
-import { button } from "leva";
-import { useControls } from "leva";
-import { Vector3 } from "three";
-
+import { CameraControls, FlyControls, OrbitControls } from '@react-three/drei';
+import { useEffect, useRef } from 'react';
+import { useConfiguratorStore } from '../store.ts';
+import { UI_MODES } from '../store_types.ts';
+import { button } from 'leva';
+import { useControls } from 'leva';
+import { Vector3 } from 'three';
 
 const MODE_CAMERA_POSITIONS = {
   desktop: {
     [UI_MODES.CUSTOMIZE]: { start: [2, 0, 10], target: [2, 0, 0] },
     [UI_MODES.LEVEL]: { start: [2, 0, 10], target: [2, 0, 0] },
-    [UI_MODES.SHOP]: { start: [-2.8352721771146134, 0.17593017066925046, 3.784070764173101], target: [2, 0, 0] },
+    [UI_MODES.SHOP]: {
+      start: [-2.8352721771146134, 0.17593017066925046, 3.784070764173101],
+      target: [2, 0, 0],
+    },
   },
   mobile: {
     [UI_MODES.CUSTOMIZE]: { start: [0, 0, 10], target: [0, 0, 0] },
     [UI_MODES.LEVEL]: { start: [0, 1, 8], target: [0, 1, 0] },
     [UI_MODES.SHOP]: { start: [0, 1, 8], target: [0, 1, 0] },
-  }
-}
+  },
+};
 
 export const DEFAULT_CAMERA_POSITION = [-1, 1, 5];
 export const DEFAULT_CAMERA_TARGET = [2, 0, 0];
 
 export const CameraManager = ({ loading }: { loading: boolean }) => {
   const controls = useRef<CameraControls | null>(null);
-  const currentCategory = useConfiguratorStore(
-    (state) => state.currentCategory
-  );
-  const initialLoading = useConfiguratorStore((state) => state.loading);
-  const mode = useConfiguratorStore((state) => state.mode);
-  const isMobile = useConfiguratorStore((state) => state.isMobile);
+  const currentCategory = useConfiguratorStore(state => state.currentCategory);
+  const initialLoading = useConfiguratorStore(state => state.loading);
+  const mode = useConfiguratorStore(state => state.mode);
+  const isMobile = useConfiguratorStore(state => state.isMobile);
 
   useControls({
     getCameraPosition: button(() => {
@@ -40,7 +40,7 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
       }
       const position = new Vector3();
       controls.current.getPosition(position);
-      console.log("Camera Position:", position);
+      console.log('Camera Position:', position);
     }),
     getCameraTarget: button(() => {
       if (!controls.current) {
@@ -49,7 +49,7 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
       }
       const target = new Vector3();
       controls.current.getTarget(target);
-      console.log("Camera Target:", target);
+      console.log('Camera Target:', target);
     }),
   });
 
@@ -102,7 +102,6 @@ export const CameraManager = ({ loading }: { loading: boolean }) => {
   }, [currentCategory, mode, initialLoading, loading, isMobile]);
 
   return (
-
     <CameraControls
       ref={controls}
       minPolarAngle={Math.PI / 4}
