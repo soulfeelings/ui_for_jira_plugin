@@ -1,19 +1,26 @@
 modules:
   jira:globalPage:
     - key: character-customization
-      resource: main
-      resolver:
-        function: resolver
+      resource: ui_client
       viewportSize: medium
-      render: native
       title: Character Customization
-  function:
-    - key: resolver
-      handler: index.handler
 resources:
-  - key: main
+  - key: ui_client
     path: static/ui_client/dist
 app:
   runtime:
     name: nodejs20.x
-  id: 7ec235ad-5cd6-4368-8537-de1e1298d832
+  id: ari:cloud:ecosystem::app/7ec235ad-5cd6-4368-8537-de1e1298d832
+permissions:
+  scopes:
+    - read:jira-user
+    - read:jira-work
+    - write:jira-work
+    - read:project:jira
+    - write:field:jira
+    - manage:jira-project
+  content:
+    styles:
+      - "unsafe-inline"
+    scripts:
+      - "unsafe-inline"
