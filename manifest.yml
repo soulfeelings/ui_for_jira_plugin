@@ -1,0 +1,19 @@
+modules:
+  jira:globalPage:
+    - key: character-customization
+      resource: main
+      resolver:
+        function: resolver
+      viewportSize: medium
+      render: native
+      title: Character Customization
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: static/ui_client/dist
+app:
+  runtime:
+    name: nodejs20.x
+  id: 7ec235ad-5cd6-4368-8537-de1e1298d832
