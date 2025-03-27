@@ -32,10 +32,17 @@ export const UI = () => {
   const mode = useConfiguratorStore((state) => state.mode);
   const setMode = useConfiguratorStore((state) => state.setMode);
   const isMobile = useConfiguratorStore((state) => state.isMobile);
+  const logout = useConfiguratorStore((state) => state.logout);
 
   return (
     <main className="pointer-events-none fixed z-10 inset-0 select-none">
       <div className="mx-auto h-full max-w-screen-xl w-full flex flex-col justify-between">
+      <button 
+          onClick={logout}
+          className="fixed top-5 left-5 pointer-events-auto bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm"
+        >
+          Logout
+        </button>
         <div className={`fixed ${isMobile ? "top-10 left-[50%] -translate-x-1/2" : "top-1/2 -translate-y-1/2 right-16"}`}>
           {mode === UI_MODES.SHOP ? <Shop /> : <LevelComponent />}
         </div>

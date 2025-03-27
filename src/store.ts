@@ -13,6 +13,14 @@ if (!pocketBaseUrl) {
 
 export const pb = new PocketBase(pocketBaseUrl);
 
+pb.authStore.onChange((token, model) => {
+  if (token && model) {
+    localStorage.setItem('pocketbase_auth', JSON.stringify({ token, record: model }));
+  } else {
+    localStorage.removeItem('pocketbase_auth');
+  }
+}, true); 
+
 
 export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   // initial data
@@ -197,18 +205,23 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
     set({ loadingUser: true });
     let user: User | undefined;
     try {
-      const respone = await pb.collection("users").authWithPassword<User>('test@test.com', 'testtest');
-      user = respone.record;
-      console.log('user', user);
+      if (pb.authStore.isValid) {
+        const response = await pb.collection('users').authRefresh<User>();
+        user = response.record;
+      }
       set({ user });
     } catch (error) {
-      console.error(error)
+      console.error(error);
+      pb.authStore.clear();
     } finally {
       set({ loadingUser: false });
     }
-
     return user;
+  },  logout: () => {
+    pb.authStore.clear();
+    set({ user: null, character: null });
   },
+
   saveName: async (name) => {
     set({ loadingName: true });
     const data = {
@@ -224,32 +237,37 @@ export const useConfiguratorStore = create<ConfiguratorStore>((set, get) => ({
   },
   createCharacter: async (name: string) => {
     set({ loadingCreateCharacter: true });
-
+  
     try {
-      const user = get().user;
-      if (!user) {
-        throw new Error('User not found or not loaded');
+      const authData = pb.authStore.model;
+      if (!authData?.id) {
+        throw new Error("User not authenticated");
       }
+  
       const hardCodedCharacter = await pb.collection('characters').getOne('z5s1a3a7508ec28');
+      
       const character = await pb.collection('user_character').create<UserCharacterExpandedCharacter>({
-        user_id: user.id,
+        user_id: authData.id,
         character_id: hardCodedCharacter.id,
         name,
       }, {
         expand: 'character_id'
       });
-
+  
       set({ character: character.expand.character_id });
+      
       await pb.collection('user_level').create({
-        user_id: user.id,
+        user_id: authData.id,
         level: 1,
       });
+      
       await pb.collection('user_xp').create({
-        user_id: user.id,
+        user_id: authData.id,
         xp: 0,
       });
     } catch (error) {
-      console.error(error)
+      console.error("Create character error:", error);
+      throw error; 
     } finally {
       set({ loadingCreateCharacter: false });
     }
@@ -338,6 +356,7 @@ window.addEventListener('resize', checkIsMobileDebounced)
 
 
 export interface ConfiguratorStore {
+  [x: string]: any;
   // initial data
   initialDataLoaded: boolean;
   character: Character | null;
