@@ -13,10 +13,11 @@ const PosesBox = () => {
     <div className="pointer-events-auto md:rounded-t-lg bg-gradient-to-br from-black/30 to-indigo-900/20  backdrop-blur-sm drop-shadow-md flex p-6 gap-3 overflow-x-auto noscrollbar">
       {Object.keys(PHOTO_POSES).map((pose) => (
         <button
-          className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${curPose === PHOTO_POSES[pose]
-            ? "text-white shadow-purple-100 border-b-white"
-            : "text-gray-200 hover:text-gray-100 border-b-transparent"
-            }
+          className={`transition-colors duration-200 font-medium flex-shrink-0 border-b ${
+            curPose === PHOTO_POSES[pose]
+              ? "text-white shadow-purple-100 border-b-white"
+              : "text-gray-200 hover:text-gray-100 border-b-transparent"
+          }
        `}
           onClick={() => setPose(PHOTO_POSES[pose])}
         >
@@ -27,7 +28,6 @@ const PosesBox = () => {
   );
 };
 
-
 export const UI = () => {
   const mode = useConfiguratorStore((state) => state.mode);
   const setMode = useConfiguratorStore((state) => state.setMode);
@@ -37,26 +37,42 @@ export const UI = () => {
   return (
     <main className="pointer-events-none fixed z-10 inset-0 select-none">
       <div className="mx-auto h-full max-w-screen-xl w-full flex flex-col justify-between">
-      <button 
+        <button
           onClick={logout}
-          className="fixed top-5 left-5 pointer-events-auto bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm"
+          className="fixed bottom-16 left-5 pointer-events-auto bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm"
         >
           Logout
         </button>
-        <div className={`fixed ${isMobile ? "top-10 left-[50%] -translate-x-1/2" : "top-1/2 -translate-y-1/2 right-16"}`}>
+        <div
+          className={`fixed ${
+            isMobile
+              ? "top-10 left-[50%] -translate-x-1/2"
+              : "top-1/2 -translate-y-1/2 right-16"
+          }`}
+        >
           {mode === UI_MODES.SHOP ? <Shop /> : <LevelComponent />}
         </div>
-        {mode !== UI_MODES.SHOP && <div className="fixed top-5 right-5">
-          <ShopButton onClick={() => { setMode(UI_MODES.SHOP) }} />
-        </div>}
-        {mode !== UI_MODES.LEVEL &&
-          <ArrowBackButton onClick={() => { setMode(UI_MODES.LEVEL) }} />
-        }
+        {mode !== UI_MODES.SHOP && (
+          <div className="fixed top-5 right-5">
+            <ShopButton
+              onClick={() => {
+                setMode(UI_MODES.SHOP);
+              }}
+            />
+          </div>
+        )}
+        {mode !== UI_MODES.LEVEL && (
+          <ArrowBackButton
+            onClick={() => {
+              setMode(UI_MODES.LEVEL);
+            }}
+          />
+        )}
         <div className="md:px-10 flex flex-col">
           {mode === UI_MODES.PHOTO && <PosesBox />}
         </div>
-      </div >
-    </main >
+      </div>
+    </main>
   );
 };
 

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useConfiguratorStore } from "../store";
 import { pb } from "../store";
 import { CharacterNameForm } from "./CharacterNameForm";
 
@@ -19,11 +18,11 @@ export const AuthForm = () => {
 
     try {
       if (isLogin) {
-       
         await pb.collection("users").authWithPassword(email, password);
         setRegistered(true);
+        // We make reload to refetch all data
+        window.location.reload();
       } else {
-        
         if (password !== passwordConfirm) {
           throw new Error("Passwords don't match");
         }
@@ -32,9 +31,11 @@ export const AuthForm = () => {
           password,
           passwordConfirm,
         });
-       
+
         await pb.collection("users").authWithPassword(email, password);
         setRegistered(true);
+        // We make reload to refetch all data
+        window.location.reload();
       }
     } catch (err: any) {
       setError(err.message);
@@ -43,17 +44,13 @@ export const AuthForm = () => {
     }
   };
 
-  if (registered) {
-    return <CharacterNameForm />;
-  }
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
       <div className="bg-gradient-to-br from-black/70 to-indigo-900/50 rounded-lg p-8 max-w-md w-full mx-4 shadow-lg">
         <h2 className="text-2xl font-bold text-white mb-6 text-center">
           {isLogin ? "Sign In" : "Sign Up"}
         </h2>
-        
+
         {error && (
           <div className="mb-4 p-2 bg-red-500/20 text-red-300 rounded text-sm">
             {error}
@@ -62,7 +59,10 @@ export const AuthForm = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
               Email
             </label>
             <input
@@ -76,7 +76,10 @@ export const AuthForm = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
               Password
             </label>
             <input
@@ -92,7 +95,10 @@ export const AuthForm = () => {
 
           {!isLogin && (
             <div>
-              <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="passwordConfirm"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Confirm Password
               </label>
               <input
